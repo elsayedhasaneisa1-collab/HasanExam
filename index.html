@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>امتحان أستاذ حسن عيسى</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="page">
+  <header class="brand">
+    <div class="logo">ح</div>
+    <div><h1>أستاذ حسن عيسى</h1><p>منصة الامتحانات • اللغة العربية</p></div>
+  </header>
+
+  <main>
+    <section id="loading" class="card center">
+      <div class="spinner"></div>
+      <h2>جاري تحميل الامتحان...</h2>
+    </section>
+
+    <section id="start" class="card center hidden">
+      <div class="book">📚</div>
+      <span class="badge">امتحان إلكتروني</span>
+      <h2 id="examTitle">امتحان اللغة العربية</h2>
+      <p id="examInfo"></p>
+      <div class="notice">✏️ اكتب اسمك كما تريد أن يظهر في النتيجة.</div>
+      <input id="studentName" maxlength="80" autocomplete="name" placeholder="اكتب اسمك هنا">
+      <button id="startBtn" disabled>ابدأ الامتحان 🚀</button>
+      <p id="error" class="error"></p>
+    </section>
+
+    <section id="exam" class="hidden">
+      <div class="examTop card">
+        <div><b id="liveTitle"></b><small id="studentLabel"></small></div>
+        <div class="timer" id="timer">00:00</div>
+      </div>
+      <div class="card">
+        <div class="progressLine"><span id="progress"></span></div>
+        <div class="qmeta" id="qmeta"></div>
+        <div id="question"></div>
+        <div class="nav"><button id="prev">السابق</button><button id="next">التالي</button></div>
+        <button id="submit" class="submit hidden">تسليم الامتحان ✅</button>
+      </div>
+    </section>
+
+    <section id="result" class="card center hidden">
+      <div class="trophy">🏆</div>
+      <h2>تم تسليم الامتحان</h2>
+      <div id="score"></div>
+      <p class="muted">يمكنك إغلاق الصفحة الآن.</p>
+    </section>
+  </main>
+
+  <footer>© أستاذ حسن عيسى</footer>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="app.js"></script>
+</body>
+</html>
