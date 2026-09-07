@@ -6,7 +6,7 @@
   <title>لوحة أستاذ حسن عيسى</title>
   
   <style>
-    /* ===== كل الـ CSS هنا ===== */
+    /* ===== كل الـ CSS ===== */
     * { box-sizing: border-box; margin: 0; padding: 0; }
     
     body {
@@ -665,577 +665,695 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- ============================================================
-       الـ JavaScript كامل هنا
+       الـ JavaScript (وضعته بعد كل حاجة عشان يشتغل صح)
   ============================================================ -->
   <script>
-    // ===== كل الـ JavaScript هنا =====
+    // ============================================================
+    // منصة أستاذ حسن عيسى - teacher.js (نسخة مضبوطة 100%)
+    // ============================================================
     
-    const CONFIG = {
-      SUPABASE_URL: "https://zvvfjmadziyuwutdresz.supabase.co",
-      SUPABASE_KEY: "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc"
-    };
+    // ===== بيانات Supabase =====
+    const SUPABASE_URL = "https://zvvfjmadziyuwutdresz.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc";
     
-    const supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_KEY);
+    // ===== تهيئة Supabase =====
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     
-    const TEACHER_CREDENTIALS = { username: 'Hasan', password: '25808' };
+    // ===== بيانات تسجيل الدخول =====
+    const TEACHER_USERNAME = 'Hasan';
+    const TEACHER_PASSWORD = '25808';
     
-    const STATE = {
-      questions: [],
-      lastResults: [],
-      lastResultsCode: '',
-      pdfDownloadedForCode: '',
-      isAuthenticated: false
-    };
-    
-    const DOM = {};
-    
-    function cacheDOM() {
-      DOM.login = document.getElementById('login');
-      DOM.app = document.getElementById('app');
-      DOM.username = document.getElementById('username');
-      DOM.password = document.getElementById('password');
-      DOM.loginBtn = document.getElementById('loginBtn');
-      DOM.loginError = document.getElementById('loginError');
-      DOM.logoutBtn = document.getElementById('logoutBtn');
+    // ============================================================
+    // لما الصفحة تتحمل بالكامل
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', function() {
       
-      DOM.examTitleInput = document.getElementById('examTitleInput');
-      DOM.duration = document.getElementById('duration');
-      DOM.availabilityDays = document.getElementById('availabilityDays');
-      DOM.questionsContainer = document.getElementById('questionsContainer');
-      DOM.addQuestionBtn = document.getElementById('addQuestionBtn');
-      DOM.createExamBtn = document.getElementById('createExamBtn');
-      DOM.createError = document.getElementById('createError');
+      console.log('✅ الصفحة تحمّلت');
       
-      DOM.createdExam = document.getElementById('createdExam');
-      DOM.createdCode = document.getElementById('createdCode');
-      DOM.shareLink = document.getElementById('shareLink');
-      DOM.shareExpiry = document.getElementById('shareExpiry');
-      DOM.copyLinkBtn = document.getElementById('copyLinkBtn');
-      DOM.newExamBtn = document.getElementById('newExamBtn');
+      // ===== عناصر الصفحة =====
+      const loginSection = document.getElementById('login');
+      const appSection = document.getElementById('app');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const loginBtn = document.getElementById('loginBtn');
+      const loginError = document.getElementById('loginError');
+      const logoutBtn = document.getElementById('logoutBtn');
       
-      DOM.resultsCode = document.getElementById('resultsCode');
-      DOM.loadResultsBtn = document.getElementById('loadResultsBtn');
-      DOM.resultsBody = document.getElementById('resultsBody');
-      DOM.resultsError = document.getElementById('resultsError');
-      DOM.downloadPdfBtn = document.getElementById('downloadPdfBtn');
-      DOM.deleteExamBtn = document.getElementById('deleteExamBtn');
+      // ===== عناصر الامتحان =====
+      const examTitleInput = document.getElementById('examTitleInput');
+      const durationInput = document.getElementById('duration');
+      const availabilityInput = document.getElementById('availabilityDays');
+      const questionsContainer = document.getElementById('questionsContainer');
+      const addQuestionBtn = document.getElementById('addQuestionBtn');
+      const createExamBtn = document.getElementById('createExamBtn');
+      const createError = document.getElementById('createError');
       
-      DOM.detailsModal = document.getElementById('detailsModal');
-      DOM.modalContent = document.getElementById('modalContent');
-      DOM.closeModalBtn = document.getElementById('closeModalBtn');
+      // ===== عناصر النتائج =====
+      const resultsCodeInput = document.getElementById('resultsCode');
+      const loadResultsBtn = document.getElementById('loadResultsBtn');
+      const resultsBody = document.getElementById('resultsBody');
+      const resultsError = document.getElementById('resultsError');
       
-      DOM.toast = document.getElementById('toast');
-    }
-    
-    function escapeHTML(text) {
-      if (!text) return '';
-      const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
-      return String(text).replace(/[&<>"']/g, char => map[char]);
-    }
-    
-    function show(el) { if (el) el.classList.remove('hidden'); }
-    function hide(el) { if (el) el.classList.add('hidden'); }
-    
-    function showToast(message, type = 'info', duration = 3000) {
-      const toast = DOM.toast;
-      if (!toast) return;
-      toast.textContent = message;
-      toast.className = `toast ${type}`;
-      void toast.offsetWidth;
-      toast.classList.add('show');
-      clearTimeout(toast._timeout);
-      toast._timeout = setTimeout(() => toast.classList.remove('show'), duration);
-    }
-    
-    function showError(el, msg) { if (el) el.textContent = msg; }
-    function clearError(el) { if (el) el.textContent = ''; }
-    
-    // ===== المصادقة =====
-    function authenticate() {
-      const username = DOM.username.value.trim();
-      const password = DOM.password.value.trim();
-      clearError(DOM.loginError);
+      // ===== عناصر الامتحان المنشأ =====
+      const createdExamDiv = document.getElementById('createdExam');
+      const createdCodeSpan = document.getElementById('createdCode');
+      const shareLinkInput = document.getElementById('shareLink');
+      const shareExpirySpan = document.getElementById('shareExpiry');
+      const copyLinkBtn = document.getElementById('copyLinkBtn');
+      const newExamBtn = document.getElementById('newExamBtn');
       
-      if (!username || !password) {
-        showError(DOM.loginError, 'اكتب اسم المستخدم وكلمة المرور.');
-        return;
+      // ===== عناصر PDF والحذف =====
+      const downloadPdfBtn = document.getElementById('downloadPdfBtn');
+      const deleteExamBtn = document.getElementById('deleteExamBtn');
+      
+      // ===== عناصر المودال =====
+      const detailsModal = document.getElementById('detailsModal');
+      const modalContent = document.getElementById('modalContent');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      
+      // ===== Toast =====
+      const toast = document.getElementById('toast');
+      
+      // ============================================================
+      // دوال مساعدة
+      // ============================================================
+      
+      function showToast(message, type = 'info', duration = 3000) {
+        if (!toast) return;
+        toast.textContent = message;
+        toast.className = `toast ${type}`;
+        toast.style.opacity = '1';
+        toast.style.transform = 'translateY(0)';
+        clearTimeout(toast._timer);
+        toast._timer = setTimeout(() => {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(20px)';
+        }, duration);
       }
       
-      if (username !== TEACHER_CREDENTIALS.username || password !== TEACHER_CREDENTIALS.password) {
-        showError(DOM.loginError, 'اسم المستخدم أو كلمة المرور غير صحيحة.');
-        return;
+      function show(el) { if (el) el.classList.remove('hidden'); }
+      function hide(el) { if (el) el.classList.add('hidden'); }
+      
+      function escapeHTML(text) {
+        if (!text) return '';
+        return String(text).replace(/[&<>"']/g, function(m) {
+          if (m === '&') return '&amp;';
+          if (m === '<') return '&lt;';
+          if (m === '>') return '&gt;';
+          if (m === '"') return '&quot;';
+          if (m === "'") return '&#039;';
+          return m;
+        });
       }
       
-      STATE.isAuthenticated = true;
-      sessionStorage.setItem('hasan_teacher_username', username);
-      sessionStorage.setItem('hasan_teacher_password', password);
+      // ============================================================
+      // حالة التطبيق
+      // ============================================================
+      const STATE = {
+        questions: [],
+        lastResults: [],
+        lastResultsCode: '',
+        pdfDownloadedForCode: '',
+        isAuthenticated: false
+      };
       
-      hide(DOM.login);
-      show(DOM.app);
-      document.body.classList.add('authenticated');
-      loadSavedExam();
-      showToast('تم تسجيل الدخول بنجاح ✅', 'success');
-    }
-    
-    function logout() {
-      STATE.isAuthenticated = false;
-      sessionStorage.removeItem('hasan_teacher_username');
-      sessionStorage.removeItem('hasan_teacher_password');
-      location.reload();
-    }
-    
-    function checkAutoLogin() {
-      const username = sessionStorage.getItem('hasan_teacher_username');
-      const password = sessionStorage.getItem('hasan_teacher_password');
-      if (username === TEACHER_CREDENTIALS.username && password === TEACHER_CREDENTIALS.password) {
-        STATE.isAuthenticated = true;
-        hide(DOM.login);
-        show(DOM.app);
-        document.body.classList.add('authenticated');
-        loadSavedExam();
-        return true;
-      }
-      return false;
-    }
-    
-    // ===== الأسئلة =====
-    function addQuestion() {
-      STATE.questions.push({ text: '', options: ['', '', '', ''], correct_index: 0 });
-      renderQuestions();
-      setTimeout(() => {
-        const els = document.querySelectorAll('[data-q]');
-        const last = els[els.length - 1];
-        if (last) last.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 100);
-    }
-    
-    function renderQuestions() {
-      if (!DOM.questionsContainer) return;
-      
-      if (!STATE.questions.length) {
-        DOM.questionsContainer.innerHTML = `
-          <div class="empty-questions">
-            <div class="icon">📝</div>
-            <p>لا توجد أسئلة بعد</p>
-            <p class="sub">اضغط "إضافة سؤال" لإضافة الأسئلة</p>
-          </div>
-        `;
-        return;
-      }
-      
-      const letters = ['أ', 'ب', 'ج', 'د'];
-      
-      DOM.questionsContainer.innerHTML = STATE.questions.map((q, qi) => {
-        return `
-          <div class="question-box" data-q="${qi}">
-            <div class="q-head">
-              <strong>📌 السؤال <span class="num">${qi + 1}</span></strong>
-              <button class="btn-danger" onclick="window.removeQuestion(${qi})" style="padding:4px 12px;font-size:11px;">🗑️ حذف</button>
-            </div>
-            
-            <textarea placeholder="📝 اكتب نص السؤال هنا..." 
-              oninput="window.updateQuestionText(${qi}, this.value)"
-            >${escapeHTML(q.text)}</textarea>
-            
-            <div class="options-grid">
-              ${q.options.map((opt, oi) => {
-                const isCorrect = q.correct_index === oi;
-                return `
-                  <div class="option-card ${isCorrect ? 'correct' : ''}">
-                    <div class="opt-label">
-                      <span class="letter">${letters[oi]}</span>
-                      <span>الاختيار ${oi + 1}</span>
-                    </div>
-                    <input type="text" value="${escapeHTML(opt)}" 
-                      placeholder="✏️ اكتب الاختيار ${oi + 1}..."
-                      oninput="window.updateOption(${qi}, ${oi}, this.value)">
-                    <label class="correct-radio">
-                      <input type="radio" name="correct-${qi}" 
-                        ${isCorrect ? 'checked' : ''}
-                        onchange="window.updateCorrect(${qi}, ${oi})">
-                      <span>${isCorrect ? '✅ الإجابة الصحيحة' : '⬜ تحديد كإجابة صحيحة'}</span>
-                    </label>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-    
-    window.updateQuestionText = function(index, value) {
-      if (STATE.questions[index]) STATE.questions[index].text = value;
-    };
-    
-    window.updateOption = function(qi, oi, value) {
-      if (STATE.questions[qi]) STATE.questions[qi].options[oi] = value;
-    };
-    
-    window.updateCorrect = function(qi, oi) {
-      if (STATE.questions[qi]) STATE.questions[qi].correct_index = oi;
-      renderQuestions();
-    };
-    
-    window.removeQuestion = function(index) {
-      if (!confirm('🗑️ هل تريد حذف هذا السؤال؟')) return;
-      STATE.questions.splice(index, 1);
-      renderQuestions();
-    };
-    
-    // ===== إنشاء الامتحان =====
-    async function createExam() {
-      const title = DOM.examTitleInput.value.trim();
-      const duration = Number(DOM.duration.value);
-      const availabilityDays = Number(DOM.availabilityDays.value);
-      clearError(DOM.createError);
-      
-      if (!title) {
-        showError(DOM.createError, '❌ اكتب اسم الامتحان.');
-        showToast('اكتب اسم الامتحان', 'error');
-        return;
-      }
-      
-      if (!Number.isFinite(duration) || duration < 1) {
-        showError(DOM.createError, '❌ اكتب مدة صحيحة.');
-        showToast('مدة الامتحان غير صحيحة', 'error');
-        return;
-      }
-      
-      if (!Number.isFinite(availabilityDays) || availabilityDays < 0.1) {
-        showError(DOM.createError, '❌ اكتب مدة إتاحة صحيحة.');
-        showToast('مدة الإتاحة غير صحيحة', 'error');
-        return;
-      }
-      
-      if (!STATE.questions.length) {
-        showError(DOM.createError, '❌ أضف سؤالاً واحداً على الأقل.');
-        showToast('أضف أسئلة للامتحان', 'error');
-        return;
-      }
-      
-      // التحقق من الأسئلة
-      for (let i = 0; i < STATE.questions.length; i++) {
-        const q = STATE.questions[i];
-        if (!q.text || !q.text.trim()) {
-          showError(DOM.createError, `❌ السؤال ${i + 1} فارغ.`);
-          showToast(`السؤال ${i + 1} فارغ`, 'error');
+      // ============================================================
+      // دالة تسجيل الدخول
+      // ============================================================
+      function handleLogin() {
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value.trim();
+        
+        loginError.textContent = '';
+        
+        if (!username || !password) {
+          loginError.textContent = '✏️ اكتب اسم المستخدم وكلمة المرور.';
           return;
         }
-        for (let j = 0; j < q.options.length; j++) {
-          if (!q.options[j] || !q.options[j].trim()) {
-            showError(DOM.createError, `❌ الاختيار ${j + 1} في السؤال ${i + 1} فارغ.`);
-            showToast(`الاختيار ${j + 1} في السؤال ${i + 1} فارغ`, 'error');
+        
+        if (username !== TEACHER_USERNAME || password !== TEACHER_PASSWORD) {
+          loginError.textContent = '❌ اسم المستخدم أو كلمة المرور غير صحيحة.';
+          return;
+        }
+        
+        // ✅ دخول ناجح
+        STATE.isAuthenticated = true;
+        
+        // حفظ الجلسة
+        sessionStorage.setItem('hasan_teacher_username', username);
+        sessionStorage.setItem('hasan_teacher_password', password);
+        
+        // إظهار التطبيق
+        hide(loginSection);
+        show(appSection);
+        document.body.classList.add('authenticated');
+        
+        showToast('✅ تم تسجيل الدخول بنجاح', 'success');
+        console.log('✅ تسجيل الدخول ناجح');
+      }
+      
+      // ============================================================
+      // دالة تسجيل الخروج
+      // ============================================================
+      function handleLogout() {
+        STATE.isAuthenticated = false;
+        sessionStorage.removeItem('hasan_teacher_username');
+        sessionStorage.removeItem('hasan_teacher_password');
+        location.reload();
+      }
+      
+      // ============================================================
+      // التحقق من الجلسة
+      // ============================================================
+      function checkSession() {
+        const username = sessionStorage.getItem('hasan_teacher_username');
+        const password = sessionStorage.getItem('hasan_teacher_password');
+        
+        if (username === TEACHER_USERNAME && password === TEACHER_PASSWORD) {
+          STATE.isAuthenticated = true;
+          hide(loginSection);
+          show(appSection);
+          document.body.classList.add('authenticated');
+          console.log('✅ تم استعادة الجلسة');
+          return true;
+        }
+        return false;
+      }
+      
+      // ============================================================
+      // الأسئلة
+      // ============================================================
+      
+      function addQuestion() {
+        STATE.questions.push({
+          text: '',
+          options: ['', '', '', ''],
+          correct_index: 0
+        });
+        renderQuestions();
+        
+        setTimeout(() => {
+          const boxes = document.querySelectorAll('.question-box');
+          const last = boxes[boxes.length - 1];
+          if (last) {
+            last.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }, 100);
+      }
+      
+      function renderQuestions() {
+        if (!questionsContainer) return;
+        
+        if (!STATE.questions.length) {
+          questionsContainer.innerHTML = `
+            <div class="empty-questions">
+              <div class="icon">📝</div>
+              <p>لا توجد أسئلة بعد</p>
+              <p class="sub">اضغط "إضافة سؤال" لإضافة الأسئلة</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const letters = ['أ', 'ب', 'ج', 'د'];
+        
+        questionsContainer.innerHTML = STATE.questions.map((q, qi) => {
+          return `
+            <div class="question-box" data-q="${qi}">
+              <div class="q-head">
+                <strong>📌 السؤال <span class="num">${qi + 1}</span></strong>
+                <button class="btn-danger" onclick="window.removeQuestion(${qi})" style="padding:4px 12px;font-size:11px;">🗑️ حذف</button>
+              </div>
+              
+              <textarea placeholder="📝 اكتب نص السؤال هنا..." 
+                oninput="window.updateQuestionText(${qi}, this.value)"
+              >${escapeHTML(q.text)}</textarea>
+              
+              <div class="options-grid">
+                ${q.options.map((opt, oi) => {
+                  const isCorrect = q.correct_index === oi;
+                  return `
+                    <div class="option-card ${isCorrect ? 'correct' : ''}">
+                      <div class="opt-label">
+                        <span class="letter">${letters[oi]}</span>
+                        <span>الاختيار ${oi + 1}</span>
+                      </div>
+                      <input type="text" value="${escapeHTML(opt)}" 
+                        placeholder="✏️ اكتب الاختيار ${oi + 1}..."
+                        oninput="window.updateOption(${qi}, ${oi}, this.value)">
+                      <label class="correct-radio">
+                        <input type="radio" name="correct-${qi}" 
+                          ${isCorrect ? 'checked' : ''}
+                          onchange="window.updateCorrect(${qi}, ${oi})">
+                        <span>${isCorrect ? '✅ الإجابة الصحيحة' : '⬜ تحديد كإجابة صحيحة'}</span>
+                      </label>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // ===== دوال تحديث الأسئلة =====
+      window.updateQuestionText = function(index, value) {
+        if (STATE.questions[index]) STATE.questions[index].text = value;
+      };
+      
+      window.updateOption = function(qi, oi, value) {
+        if (STATE.questions[qi]) STATE.questions[qi].options[oi] = value;
+      };
+      
+      window.updateCorrect = function(qi, oi) {
+        if (STATE.questions[qi]) STATE.questions[qi].correct_index = oi;
+        renderQuestions();
+      };
+      
+      window.removeQuestion = function(index) {
+        if (!confirm('🗑️ هل تريد حذف هذا السؤال؟')) return;
+        STATE.questions.splice(index, 1);
+        renderQuestions();
+      };
+      
+      // ============================================================
+      // إنشاء الامتحان
+      // ============================================================
+      
+      async function createExam() {
+        const title = examTitleInput.value.trim();
+        const duration = Number(durationInput.value);
+        const availabilityDays = Number(availabilityInput.value);
+        
+        createError.textContent = '';
+        
+        if (!title) {
+          createError.textContent = '❌ اكتب اسم الامتحان.';
+          showToast('اكتب اسم الامتحان', 'error');
+          return;
+        }
+        
+        if (!Number.isFinite(duration) || duration < 1) {
+          createError.textContent = '❌ اكتب مدة صحيحة.';
+          showToast('مدة الامتحان غير صحيحة', 'error');
+          return;
+        }
+        
+        if (!Number.isFinite(availabilityDays) || availabilityDays < 0.1) {
+          createError.textContent = '❌ اكتب مدة إتاحة صحيحة.';
+          showToast('مدة الإتاحة غير صحيحة', 'error');
+          return;
+        }
+        
+        if (!STATE.questions.length) {
+          createError.textContent = '❌ أضف سؤالاً واحداً على الأقل.';
+          showToast('أضف أسئلة للامتحان', 'error');
+          return;
+        }
+        
+        // التحقق من الأسئلة
+        for (let i = 0; i < STATE.questions.length; i++) {
+          const q = STATE.questions[i];
+          if (!q.text || !q.text.trim()) {
+            createError.textContent = `❌ السؤال ${i + 1} فارغ.`;
+            showToast(`السؤال ${i + 1} فارغ`, 'error');
             return;
           }
+          for (let j = 0; j < q.options.length; j++) {
+            if (!q.options[j] || !q.options[j].trim()) {
+              createError.textContent = `❌ الاختيار ${j + 1} في السؤال ${i + 1} فارغ.`;
+              showToast(`الاختيار ${j + 1} في السؤال ${i + 1} فارغ`, 'error');
+              return;
+            }
+          }
+        }
+        
+        const cleanQuestions = STATE.questions.map(q => ({
+          text: q.text.trim(),
+          options: q.options.map(o => o.trim()),
+          correct_index: q.correct_index
+        }));
+        
+        createExamBtn.disabled = true;
+        const oldText = createExamBtn.textContent;
+        createExamBtn.textContent = '⏳ جاري الإنشاء...';
+        
+        try {
+          const { data, error } = await supabaseClient.rpc('create_public_exam_with_expiry', {
+            p_title: title,
+            p_duration_minutes: duration,
+            p_questions: cleanQuestions,
+            p_availability_days: availabilityDays,
+            p_teacher_username: TEACHER_USERNAME,
+            p_teacher_password: TEACHER_PASSWORD
+          });
+          
+          if (error) throw new Error(error.message);
+          if (!data || !data.length) throw new Error('لم يتم استلام بيانات الامتحان');
+          
+          const result = data[0];
+          if (!result || !result.code) throw new Error('لم يتم استلام كود الامتحان');
+          
+          localStorage.setItem('hasan_last_exam_code', result.code);
+          createdCodeSpan.textContent = result.code;
+          
+          const basePath = location.pathname.replace(/teacher\.html$/, '');
+          const shareLink = `${location.origin}${basePath}index.html?exam=${encodeURIComponent(result.code)}`;
+          shareLinkInput.value = shareLink;
+          
+          if (result.expires_at) {
+            const date = new Date(result.expires_at);
+            shareExpirySpan.textContent = `📅 ينتهي في: ${date.toLocaleString('ar-EG')}`;
+          }
+          
+          show(createdExamDiv);
+          showToast('🎉 تم إنشاء الامتحان بنجاح!', 'success', 4000);
+          
+        } catch (error) {
+          console.error('Create exam error:', error);
+          createError.textContent = `❌ ${error.message || 'حدث خطأ'}`;
+          showToast(error.message || 'فشل إنشاء الامتحان', 'error');
+        } finally {
+          createExamBtn.disabled = false;
+          createExamBtn.textContent = oldText;
         }
       }
       
-      const cleanQuestions = STATE.questions.map(q => ({
-        text: q.text.trim(),
-        options: q.options.map(o => o.trim()),
-        correct_index: q.correct_index
-      }));
+      // ============================================================
+      // النتائج
+      // ============================================================
       
-      DOM.createExamBtn.disabled = true;
-      const oldText = DOM.createExamBtn.textContent;
-      DOM.createExamBtn.textContent = '⏳ جاري الإنشاء...';
-      
-      try {
-        const { data, error } = await supabase.rpc('create_public_exam_with_expiry', {
-          p_title: title,
-          p_duration_minutes: duration,
-          p_questions: cleanQuestions,
-          p_availability_days: availabilityDays,
-          p_teacher_username: TEACHER_CREDENTIALS.username,
-          p_teacher_password: TEACHER_CREDENTIALS.password
-        });
+      async function loadResults() {
+        const code = resultsCodeInput.value.trim();
+        resultsError.textContent = '';
         
-        if (error) throw new Error(error.message);
-        if (!data || !data.length) throw new Error('لم يتم استلام بيانات الامتحان');
-        
-        const result = data[0];
-        if (!result || !result.code) throw new Error('لم يتم استلام كود الامتحان');
-        
-        localStorage.setItem('hasan_last_exam_code', result.code);
-        DOM.createdCode.textContent = result.code;
-        
-        const basePath = location.pathname.replace(/teacher\.html$/, '');
-        const shareLink = `${location.origin}${basePath}index.html?exam=${encodeURIComponent(result.code)}`;
-        DOM.shareLink.value = shareLink;
-        
-        if (result.expires_at) {
-          const date = new Date(result.expires_at);
-          DOM.shareExpiry.textContent = `📅 ينتهي في: ${date.toLocaleString('ar-EG')}`;
+        if (!code) {
+          resultsError.textContent = '📝 اكتب كود الامتحان.';
+          showToast('اكتب كود الامتحان', 'error');
+          return;
         }
         
-        show(DOM.createdExam);
-        showToast('🎉 تم إنشاء الامتحان بنجاح!', 'success', 4000);
+        loadResultsBtn.disabled = true;
+        const oldText = loadResultsBtn.textContent;
+        loadResultsBtn.textContent = '⏳ جاري التحميل...';
         
-      } catch (error) {
-        console.error('Create exam error:', error);
-        showError(DOM.createError, `❌ ${error.message || 'حدث خطأ'}`);
-        showToast(error.message || 'فشل إنشاء الامتحان', 'error');
-      } finally {
-        DOM.createExamBtn.disabled = false;
-        DOM.createExamBtn.textContent = oldText;
+        try {
+          const { data, error } = await supabaseClient.rpc('teacher_public_results', {
+            p_code: code,
+            p_teacher_username: TEACHER_USERNAME,
+            p_teacher_password: TEACHER_PASSWORD
+          });
+          
+          if (error) throw new Error(error.message);
+          
+          STATE.lastResults = Array.isArray(data) ? data : [];
+          STATE.lastResultsCode = code;
+          
+          renderResults(STATE.lastResults);
+          
+          downloadPdfBtn.disabled = STATE.lastResults.length === 0;
+          deleteExamBtn.disabled = true;
+          
+          if (STATE.lastResults.length > 0) {
+            showToast(`📊 تم تحميل ${STATE.lastResults.length} نتيجة`, 'success');
+          } else {
+            showToast('📭 لا توجد نتائج', 'info');
+          }
+          
+        } catch (error) {
+          console.error('Load results error:', error);
+          resultsError.textContent = `❌ ${error.message || 'تعذر تحميل النتائج'}`;
+          showToast(error.message || 'فشل تحميل النتائج', 'error');
+        } finally {
+          loadResultsBtn.disabled = false;
+          loadResultsBtn.textContent = oldText;
+        }
       }
-    }
-    
-    // ===== النتائج =====
-    async function loadResults() {
-      const code = DOM.resultsCode.value.trim();
-      clearError(DOM.resultsError);
       
-      if (!code) {
-        showError(DOM.resultsError, '📝 اكتب كود الامتحان.');
-        showToast('اكتب كود الامتحان', 'error');
-        return;
-      }
-      
-      DOM.loadResultsBtn.disabled = true;
-      const oldText = DOM.loadResultsBtn.textContent;
-      DOM.loadResultsBtn.textContent = '⏳ جاري التحميل...';
-      
-      try {
-        const { data, error } = await supabase.rpc('teacher_public_results', {
-          p_code: code,
-          p_teacher_username: TEACHER_CREDENTIALS.username,
-          p_teacher_password: TEACHER_CREDENTIALS.password
-        });
+      function renderResults(rows) {
+        if (!resultsBody) return;
         
-        if (error) throw new Error(error.message);
-        
-        STATE.lastResults = Array.isArray(data) ? data : [];
-        STATE.lastResultsCode = code;
-        renderResults(STATE.lastResults);
-        
-        DOM.downloadPdfBtn.disabled = STATE.lastResults.length === 0;
-        DOM.deleteExamBtn.disabled = true;
-        
-        if (STATE.lastResults.length > 0) {
-          showToast(`📊 تم تحميل ${STATE.lastResults.length} نتيجة`, 'success');
-        } else {
-          showToast('📭 لا توجد نتائج', 'info');
+        if (!rows.length) {
+          resultsBody.innerHTML = `<tr><td colspan="6" class="empty">📭 لا توجد نتائج حتى الآن</td></tr>`;
+          return;
         }
         
-      } catch (error) {
-        console.error('Load results error:', error);
-        showError(DOM.resultsError, `❌ ${error.message || 'تعذر تحميل النتائج'}`);
-        showToast(error.message || 'فشل تحميل النتائج', 'error');
-      } finally {
-        DOM.loadResultsBtn.disabled = false;
-        DOM.loadResultsBtn.textContent = oldText;
+        resultsBody.innerHTML = rows.map((row, i) => {
+          const score = row.score ?? 0;
+          const total = row.total ?? row.question_count ?? '-';
+          const submitted = row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-';
+          const status = row.submitted_at ? '✅ تم التسليم' : '⏳ لم يتم التسليم';
+          
+          return `
+            <tr>
+              <td>${i + 1}</td>
+              <td><strong>${escapeHTML(row.student_name)}</strong></td>
+              <td><strong style="color:#5ce1ff;">${escapeHTML(score)}</strong> / ${escapeHTML(total)}</td>
+              <td>${escapeHTML(submitted)}</td>
+              <td>${status}</td>
+              <td>
+                <button class="btn-secondary" onclick="window.showDetails(${i})" style="padding:4px 10px;font-size:11px;">📋 تفاصيل</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
       }
-    }
-    
-    function renderResults(rows) {
-      if (!DOM.resultsBody) return;
       
-      if (!rows.length) {
-        DOM.resultsBody.innerHTML = `<tr><td colspan="6" class="empty">📭 لا توجد نتائج حتى الآن</td></tr>`;
-        return;
-      }
-      
-      DOM.resultsBody.innerHTML = rows.map((row, i) => {
-        const score = row.score ?? 0;
-        const total = row.total ?? row.question_count ?? '-';
-        const submitted = row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-';
-        const status = row.submitted_at ? '✅ تم التسليم' : '⏳ لم يتم التسليم';
+      window.showDetails = function(index) {
+        const row = STATE.lastResults[index];
+        if (!row) return;
         
-        return `
-          <tr>
-            <td>${i + 1}</td>
-            <td><strong>${escapeHTML(row.student_name)}</strong></td>
-            <td><strong style="color:#5ce1ff;">${escapeHTML(score)}</strong> / ${escapeHTML(total)}</td>
-            <td>${escapeHTML(submitted)}</td>
-            <td>${status}</td>
-            <td>
-              <button class="btn-secondary" onclick="window.showDetails(${i})" style="padding:4px 10px;font-size:11px;">📋 تفاصيل</button>
-            </td>
-          </tr>
-        `;
-      }).join('');
-    }
-    
-    window.showDetails = function(index) {
-      const row = STATE.lastResults[index];
-      if (!row) return;
-      
-      DOM.modalContent.innerHTML = `
-        <div style="padding:6px 0;">
-          <div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:11px;margin:6px 0;">
-            <p style="margin:6px 0;"><strong>👤 الطالب:</strong> ${escapeHTML(row.student_name)}</p>
-            <p style="margin:6px 0;"><strong>📊 الدرجة:</strong> <span style="color:#5ce1ff;font-size:20px;font-weight:900;">${escapeHTML(row.score ?? 0)}</span> / ${escapeHTML(row.total ?? row.question_count ?? '-')}</p>
-            <p style="margin:6px 0;"><strong>🕐 وقت التسليم:</strong> ${row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-'}</p>
+        modalContent.innerHTML = `
+          <div style="padding:6px 0;">
+            <div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:11px;margin:6px 0;">
+              <p style="margin:6px 0;"><strong>👤 الطالب:</strong> ${escapeHTML(row.student_name)}</p>
+              <p style="margin:6px 0;"><strong>📊 الدرجة:</strong> <span style="color:#5ce1ff;font-size:20px;font-weight:900;">${escapeHTML(row.score ?? 0)}</span> / ${escapeHTML(row.total ?? row.question_count ?? '-')}</p>
+              <p style="margin:6px 0;"><strong>🕐 وقت التسليم:</strong> ${row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-'}</p>
+            </div>
           </div>
-        </div>
-      `;
+        `;
+        
+        show(detailsModal);
+      };
       
-      show(DOM.detailsModal);
-    };
-    
-    // ===== PDF =====
-    function downloadPDF() {
-      const code = DOM.resultsCode.value.trim();
+      // ============================================================
+      // PDF
+      // ============================================================
       
-      if (!code) { showToast('📝 اكتب كود الامتحان أولاً.', 'error'); return; }
-      if (!STATE.lastResults.length) { showToast('📭 لا توجد نتائج.', 'error'); return; }
-      if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
-        showToast('❌ تعذر تحميل PDF.', 'error');
-        return;
+      function downloadPDF() {
+        const code = resultsCodeInput.value.trim();
+        
+        if (!code) { showToast('📝 اكتب كود الامتحان أولاً.', 'error'); return; }
+        if (!STATE.lastResults.length) { showToast('📭 لا توجد نتائج.', 'error'); return; }
+        if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+          showToast('❌ تعذر تحميل PDF.', 'error');
+          return;
+        }
+        
+        try {
+          const doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+          
+          doc.setFontSize(20);
+          doc.setTextColor(37, 136, 255);
+          doc.text('📊 نتائج امتحان أستاذ حسن عيسى', 105, 18, { align: 'center' });
+          
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(11);
+          doc.text(`🔑 كود الامتحان: ${code}`, 105, 26, { align: 'center' });
+          doc.text(`📅 تاريخ التصدير: ${new Date().toLocaleString('ar-EG')}`, 105, 32, { align: 'center' });
+          
+          const rows = STATE.lastResults.map((row, i) => [
+            String(i + 1),
+            String(row.student_name ?? ''),
+            `${row.score ?? 0} / ${row.total ?? row.question_count ?? '-'}`,
+            row.submitted_at ? new Date(row.submitted_at).toLocaleString('en-GB') : '-',
+            row.submitted_at ? 'تم التسليم' : 'لم يتم التسليم'
+          ]);
+          
+          doc.autoTable({
+            startY: 38,
+            head: [['#', 'الطالب', 'الدرجة', 'وقت التسليم', 'الحالة']],
+            body: rows,
+            styles: { fontSize: 9, cellPadding: 3 },
+            headStyles: { fontStyle: 'bold', fillColor: [37, 136, 255] }
+          });
+          
+          doc.save(`نتائج-الامتحان-${code}.pdf`);
+          STATE.pdfDownloadedForCode = code;
+          deleteExamBtn.disabled = false;
+          showToast('📄 تم تنزيل PDF بنجاح', 'success');
+          
+        } catch (error) {
+          console.error('PDF error:', error);
+          showToast('❌ حدث خطأ أثناء إنشاء PDF.', 'error');
+        }
       }
       
-      try {
-        const doc = new window.jspdf.jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-        
-        doc.setFontSize(20);
-        doc.setTextColor(37, 136, 255);
-        doc.text('📊 نتائج امتحان أستاذ حسن عيسى', 105, 18, { align: 'center' });
-        
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(11);
-        doc.text(`🔑 كود الامتحان: ${code}`, 105, 26, { align: 'center' });
-        doc.text(`📅 تاريخ التصدير: ${new Date().toLocaleString('ar-EG')}`, 105, 32, { align: 'center' });
-        
-        const rows = STATE.lastResults.map((row, i) => [
-          String(i + 1),
-          String(row.student_name ?? ''),
-          `${row.score ?? 0} / ${row.total ?? row.question_count ?? '-'}`,
-          row.submitted_at ? new Date(row.submitted_at).toLocaleString('en-GB') : '-',
-          row.submitted_at ? 'تم التسليم' : 'لم يتم التسليم'
-        ]);
-        
-        doc.autoTable({
-          startY: 38,
-          head: [['#', 'الطالب', 'الدرجة', 'وقت التسليم', 'الحالة']],
-          body: rows,
-          styles: { fontSize: 9, cellPadding: 3 },
-          headStyles: { fontStyle: 'bold', fillColor: [37, 136, 255] }
-        });
-        
-        doc.save(`نتائج-الامتحان-${code}.pdf`);
-        STATE.pdfDownloadedForCode = code;
-        DOM.deleteExamBtn.disabled = false;
-        showToast('📄 تم تنزيل PDF بنجاح', 'success');
-        
-      } catch (error) {
-        console.error('PDF error:', error);
-        showToast('❌ حدث خطأ أثناء إنشاء PDF.', 'error');
-      }
-    }
-    
-    // ===== حذف الامتحان =====
-    async function deleteExam() {
-      const code = STATE.lastResultsCode || DOM.resultsCode.value.trim();
+      // ============================================================
+      // حذف الامتحان
+      // ============================================================
       
-      if (!code) { showToast('📝 اكتب كود الامتحان.', 'error'); return; }
-      if (STATE.pdfDownloadedForCode !== code) {
-        showToast('⚠️ يجب تنزيل PDF أولاً.', 'error');
-        return;
-      }
-      
-      if (!confirm(`⚠️ تحذير!\n\nسيتم حذف الامتحان (${code}) وجميع نتائجه نهائيًا.\n\nتأكد أنك احتفظت بملف PDF.\n\nهل تريد المتابعة؟`)) return;
-      
-      const typedCode = prompt(`للتأكيد، اكتب كود الامتحان:\n${code}`);
-      if (typedCode === null) return;
-      if (typedCode.trim().toUpperCase() !== code.toUpperCase()) {
-        showToast('❌ كود غير مطابق.', 'error');
-        return;
+      async function deleteExam() {
+        const code = STATE.lastResultsCode || resultsCodeInput.value.trim();
+        
+        if (!code) { showToast('📝 اكتب كود الامتحان.', 'error'); return; }
+        if (STATE.pdfDownloadedForCode !== code) {
+          showToast('⚠️ يجب تنزيل PDF أولاً.', 'error');
+          return;
+        }
+        
+        if (!confirm(`⚠️ تحذير!\n\nسيتم حذف الامتحان (${code}) وجميع نتائجه نهائيًا.\n\nتأكد أنك احتفظت بملف PDF.\n\nهل تريد المتابعة؟`)) return;
+        
+        const typedCode = prompt(`للتأكيد، اكتب كود الامتحان:\n${code}`);
+        if (typedCode === null) return;
+        if (typedCode.trim().toUpperCase() !== code.toUpperCase()) {
+          showToast('❌ كود غير مطابق.', 'error');
+          return;
+        }
+        
+        deleteExamBtn.disabled = true;
+        const oldText = deleteExamBtn.textContent;
+        deleteExamBtn.textContent = '⏳ جاري الحذف...';
+        
+        try {
+          const { data, error } = await supabaseClient.rpc('delete_public_exam', {
+            p_code: code,
+            p_teacher_username: TEACHER_USERNAME,
+            p_teacher_password: TEACHER_PASSWORD
+          });
+          
+          if (error) throw new Error(error.message);
+          if (!data || data.success !== true) throw new Error('لم يتم الحذف.');
+          
+          STATE.lastResults = [];
+          STATE.lastResultsCode = '';
+          STATE.pdfDownloadedForCode = '';
+          renderResults([]);
+          resultsCodeInput.value = '';
+          downloadPdfBtn.disabled = true;
+          deleteExamBtn.disabled = true;
+          hide(createdExamDiv);
+          showToast('🗑️ تم حذف الامتحان بنجاح', 'success');
+          
+        } catch (error) {
+          console.error('Delete error:', error);
+          showToast(`❌ ${error.message || 'فشل الحذف'}`, 'error');
+          deleteExamBtn.disabled = false;
+          deleteExamBtn.textContent = oldText;
+        }
       }
       
-      DOM.deleteExamBtn.disabled = true;
-      const oldText = DOM.deleteExamBtn.textContent;
-      DOM.deleteExamBtn.textContent = '⏳ جاري الحذف...';
+      // ============================================================
+      // نسخ الرابط
+      // ============================================================
       
-      try {
-        const { data, error } = await supabase.rpc('delete_public_exam', {
-          p_code: code,
-          p_teacher_username: TEACHER_CREDENTIALS.username,
-          p_teacher_password: TEACHER_CREDENTIALS.password
-        });
-        
-        if (error) throw new Error(error.message);
-        if (!data || data.success !== true) throw new Error('لم يتم الحذف.');
-        
-        STATE.lastResults = [];
-        STATE.lastResultsCode = '';
-        STATE.pdfDownloadedForCode = '';
-        renderResults([]);
-        DOM.resultsCode.value = '';
-        DOM.downloadPdfBtn.disabled = true;
-        DOM.deleteExamBtn.disabled = true;
-        hide(DOM.createdExam);
-        showToast('🗑️ تم حذف الامتحان بنجاح', 'success');
-        
-      } catch (error) {
-        console.error('Delete error:', error);
-        showToast(`❌ ${error.message || 'فشل الحذف'}`, 'error');
-        DOM.deleteExamBtn.disabled = false;
-        DOM.deleteExamBtn.textContent = oldText;
+      async function copyLink() {
+        if (!shareLinkInput || !shareLinkInput.value.trim()) return;
+        try {
+          await navigator.clipboard.writeText(shareLinkInput.value);
+        } catch {
+          shareLinkInput.select();
+          document.execCommand('copy');
+        }
+        const old = copyLinkBtn.textContent;
+        copyLinkBtn.textContent = '✅ تم النسخ';
+        setTimeout(() => copyLinkBtn.textContent = old, 1500);
+        showToast('📋 تم نسخ الرابط', 'success');
       }
-    }
-    
-    function loadSavedExam() {
-      const code = localStorage.getItem('hasan_last_exam_code');
-      if (code && DOM.resultsCode) DOM.resultsCode.value = code;
-    }
-    
-    // ===== نسخ الرابط =====
-    async function copyLink() {
-      const input = DOM.shareLink;
-      if (!input || !input.value.trim()) return;
-      try { await navigator.clipboard.writeText(input.value); } catch { input.select(); document.execCommand('copy'); }
-      const old = DOM.copyLinkBtn.textContent;
-      DOM.copyLinkBtn.textContent = '✅ تم النسخ';
-      setTimeout(() => DOM.copyLinkBtn.textContent = old, 1500);
-      showToast('📋 تم نسخ الرابط', 'success');
-    }
-    
-    function closeModal() { hide(DOM.detailsModal); }
-    
-    // ===== إعداد المستمعات =====
-    function setupEventListeners() {
-      DOM.loginBtn.addEventListener('click', authenticate);
-      DOM.username.addEventListener('keydown', e => { if (e.key === 'Enter') authenticate(); });
-      DOM.password.addEventListener('keydown', e => { if (e.key === 'Enter') authenticate(); });
-      DOM.logoutBtn.addEventListener('click', logout);
       
-      DOM.addQuestionBtn.addEventListener('click', addQuestion);
-      DOM.createExamBtn.addEventListener('click', createExam);
+      // ============================================================
+      // إغلاق المودال
+      // ============================================================
       
-      DOM.loadResultsBtn.addEventListener('click', loadResults);
-      DOM.resultsCode.addEventListener('keydown', e => { if (e.key === 'Enter') loadResults(); });
+      function closeModal() {
+        hide(detailsModal);
+      }
       
-      DOM.downloadPdfBtn.addEventListener('click', downloadPDF);
-      DOM.deleteExamBtn.addEventListener('click', deleteExam);
-      DOM.copyLinkBtn.addEventListener('click', copyLink);
+      // ============================================================
+      // تحميل الامتحان المحفوظ
+      // ============================================================
       
-      DOM.newExamBtn.addEventListener('click', () => {
+      function loadSavedExam() {
+        const code = localStorage.getItem('hasan_last_exam_code');
+        if (code && resultsCodeInput) {
+          resultsCodeInput.value = code;
+        }
+      }
+      
+      // ============================================================
+      // ربط الأزرار
+      // ============================================================
+      
+      // زر تسجيل الدخول
+      loginBtn.addEventListener('click', handleLogin);
+      
+      // Enter في حقول الدخول
+      usernameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') handleLogin();
+      });
+      passwordInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') handleLogin();
+      });
+      
+      // زر تسجيل الخروج
+      logoutBtn.addEventListener('click', handleLogout);
+      
+      // إضافة سؤال
+      addQuestionBtn.addEventListener('click', addQuestion);
+      
+      // إنشاء الامتحان
+      createExamBtn.addEventListener('click', createExam);
+      
+      // تحميل النتائج
+      loadResultsBtn.addEventListener('click', loadResults);
+      resultsCodeInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') loadResults();
+      });
+      
+      // PDF
+      downloadPdfBtn.addEventListener('click', downloadPDF);
+      
+      // حذف الامتحان
+      deleteExamBtn.addEventListener('click', deleteExam);
+      
+      // نسخ الرابط
+      copyLinkBtn.addEventListener('click', copyLink);
+      
+      // امتحان جديد
+      newExamBtn.addEventListener('click', function() {
         STATE.questions = [];
         renderQuestions();
-        DOM.examTitleInput.value = '';
-        DOM.duration.value = '30';
-        DOM.availabilityDays.value = '1';
-        clearError(DOM.createError);
-        hide(DOM.createdExam);
+        examTitleInput.value = '';
+        durationInput.value = '30';
+        availabilityInput.value = '1';
+        createError.textContent = '';
+        hide(createdExamDiv);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       });
       
-      DOM.closeModalBtn.addEventListener('click', closeModal);
-      DOM.detailsModal.addEventListener('click', e => { if (e.target === DOM.detailsModal) closeModal(); });
-    }
-    
-    // ===== التهيئة =====
-    document.addEventListener('DOMContentLoaded', function() {
-      cacheDOM();
-      if (!checkAutoLogin()) {
-        show(DOM.login);
-        hide(DOM.app);
+      // إغلاق المودال
+      closeModalBtn.addEventListener('click', closeModal);
+      detailsModal.addEventListener('click', function(e) {
+        if (e.target === detailsModal) closeModal();
+      });
+      
+      // ============================================================
+      // التهيئة
+      // ============================================================
+      
+      // التحقق من الجلسة
+      if (!checkSession()) {
+        show(loginSection);
+        hide(appSection);
       }
+      
+      // عرض الأسئلة
       renderQuestions();
-      setupEventListeners();
-      hide(DOM.detailsModal);
+      
+      // تحميل الامتحان المحفوظ
+      loadSavedExam();
+      
+      console.log('✅ التطبيق جاهز');
     });
   </script>
 
