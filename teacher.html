@@ -85,6 +85,49 @@
         .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37,136,255,0.3); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
         
+        .btn-danger {
+            background: rgba(255,71,87,0.15);
+            border: 1px solid rgba(255,71,87,0.2);
+            color: #ff7187;
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-danger:hover { background: rgba(255,71,87,0.25); border-color: rgba(255,71,87,0.4); }
+        
+        .btn-danger-full {
+            background: rgba(255,0,0,0.15);
+            border: 2px solid #ff4444;
+            color: #ff6b6b;
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        .btn-danger-full:hover { background: rgba(255,0,0,0.25); transform: translateY(-2px); }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 11px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
+        
         #app { display: none !important; max-width: 1100px; margin: 0 auto; padding: 0 12px; }
         body.authenticated #app { display: block !important; }
         body.authenticated #login { display: none !important; }
@@ -116,35 +159,6 @@
         }
         .topbar .brand h1 { font-size: 17px; margin: 0; }
         .topbar .brand p { font-size: 10px; color: #8293aa; margin: 2px 0 0; }
-        
-        .btn-danger {
-            background: rgba(255,71,87,0.15);
-            border: 1px solid rgba(255,71,87,0.2);
-            color: #ff7187;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        .btn-danger:hover { background: rgba(255,71,87,0.25); border-color: rgba(255,71,87,0.4); }
-        
-        .btn-secondary {
-            background: rgba(255,255,255,0.06);
-            border: 1px solid rgba(255,255,255,0.08);
-            color: #fff;
-            padding: 10px 18px;
-            border-radius: 11px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .btn-secondary:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
         
         .card {
             background: rgba(12,19,32,0.9);
@@ -375,20 +389,44 @@
         .results-table tr:hover td { background: rgba(255,255,255,0.02); }
         .results-table .empty { text-align: center; padding: 25px; color: #8293aa; }
         
-        .pdf-actions {
+        .telegram-actions {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid #1d3048;
+            margin: 12px 0;
         }
-        .pdf-actions small {
-            grid-column: 1 / -1;
-            font-size: 10px;
-            color: #8293aa;
-            text-align: center;
+        
+        .delete-actions {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin: 10px 0;
         }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 22px;
+            border-radius: 11px;
+            color: #fff;
+            font-weight: 700;
+            z-index: 999;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.35s ease;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            max-width: 90vw;
+            font-size: 14px;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { background: linear-gradient(135deg, #0da66d, #0a8a5a); }
+        .toast.error { background: linear-gradient(135deg, #ff7187, #d43a54); }
+        .toast.info { background: linear-gradient(135deg, #2588ff, #0b5ed6); }
+        .toast.warning { background: linear-gradient(135deg, #f6a832, #d4880f); }
+        
+        .footer { text-align: center; padding: 20px; }
+        .footer p { font-size: 10px; color: #8293aa; margin: 3px 0; }
         
         .modal {
             position: fixed;
@@ -425,30 +463,6 @@
         .modal-close:hover { color: #fff; }
         .modal-box h2 { margin: 0 0 14px; }
         
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 12px 22px;
-            border-radius: 11px;
-            color: #fff;
-            font-weight: 700;
-            z-index: 999;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.35s ease;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            max-width: 90vw;
-            font-size: 14px;
-        }
-        .toast.show { opacity: 1; transform: translateY(0); }
-        .toast.success { background: linear-gradient(135deg, #0da66d, #0a8a5a); }
-        .toast.error { background: linear-gradient(135deg, #ff7187, #d43a54); }
-        .toast.info { background: linear-gradient(135deg, #2588ff, #0b5ed6); }
-        
-        .footer { text-align: center; padding: 20px; }
-        .footer p { font-size: 10px; color: #8293aa; margin: 3px 0; }
-        
         @media (max-width: 768px) {
             .topbar { padding: 10px 14px; }
             .topbar .brand h1 { font-size: 14px; }
@@ -457,7 +471,8 @@
             .options-grid { grid-template-columns: 1fr; }
             .result-row { grid-template-columns: 1fr; gap: 4px; }
             .result-actions { grid-template-columns: 1fr; }
-            .pdf-actions { grid-template-columns: 1fr; }
+            .telegram-actions { grid-template-columns: 1fr; }
+            .delete-actions { grid-template-columns: 1fr; }
             .login-card { padding: 24px 16px; }
             .card-header { flex-direction: column; }
         }
@@ -581,12 +596,13 @@
             </div>
         </div>
 
-        <!-- ===== النتائج + التيليجرام ===== -->
+        <!-- ===== النتائج + التيليجرام + حذف البيانات ===== -->
         <div class="card">
             <div class="card-header">
                 <div>
                     <h2>📊 نتائج الطلاب</h2>
-                    <p>عرض نتائج الطلاب والدرجات الخاصة بالامتحانات.</p>
+                    <p>عرض نتائج الطلاب والدرجات الخاصة بالامتحانات.<br>
+                    <span style="color:#5ce1ff;">✅ سيتم إرسال النتائج تلقائياً للتيليجرام</span></p>
                 </div>
                 <button id="loadResultsBtn" class="btn-secondary">🔄 تحديث النتائج</button>
             </div>
@@ -597,13 +613,15 @@
             </div>
 
             <!-- ✅ أزرار التيليجرام -->
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;">
-                <button id="sendTelegramBtn" class="btn-primary" disabled>
-                    📤 إرسال للتيليجرام
-                </button>
-                <button id="setupTelegramBtn" class="btn-secondary">
-                    ⚙️ إعداد البوت
-                </button>
+            <div class="telegram-actions">
+                <button id="setupTelegramBtn" class="btn-secondary">⚙️ إعداد البوت</button>
+                <button id="sendTelegramBtn" class="btn-primary" disabled>📤 إرسال يدوي</button>
+            </div>
+
+            <!-- ✅ أزرار حذف البيانات -->
+            <div class="delete-actions">
+                <button id="deleteExamBtn" class="btn-danger" disabled>🗑️ حذف امتحان</button>
+                <button id="deleteAllBtn" class="btn-danger-full">💣 حذف كل البيانات</button>
             </div>
 
             <p id="resultsError" class="error"></p>
@@ -617,20 +635,14 @@
                             <th>📊 الدرجة</th>
                             <th>🕐 وقت التسليم</th>
                             <th>📌 الحالة</th>
-                            <th>📋 التفاصيل</th>
                         </tr>
                     </thead>
                     <tbody id="resultsBody">
-                        <tr><td colspan="6" class="empty">📭 لا توجد نتائج حتى الآن</td></tr>
+                        <tr><td colspan="5" class="empty">📭 لا توجد نتائج حتى الآن</td></tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="pdf-actions">
-                <button id="downloadPdfBtn" class="btn-primary" disabled>📄 تنزيل النتائج PDF</button>
-                <button id="deleteExamBtn" class="btn-danger" disabled>🗑️ حذف الامتحان ونتائجه</button>
-                <small>⚠️ لا يمكن الحذف إلا بعد تنزيل ملف PDF، والحذف نهائي ولا يمكن التراجع عنه.</small>
-            </div>
         </div>
 
         <!-- الفوتر -->
@@ -658,321 +670,44 @@
 <!-- ============================================================
      المكتبات
 ============================================================ -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- ============================================================
-     كل الـ JavaScript
+     teacher.js
 ============================================================ -->
 <script>
 // ============================================================
-// teacher.js - النسخة النهائية مع التيليجرام
+// teacher.js - مع حذف البيانات
 // ============================================================
 
 console.log('🚀 teacher.js بدأ التحميل');
 
-// ============================================================
-// بيانات Supabase
-// ============================================================
+// ===== Supabase =====
 const SUPABASE_URL = "https://zvvfjmadziyuwutdresz.supabase.co";
 const SUPABASE_KEY = "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc";
-
 const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const TEACHER_USERNAME = 'Hasan';
 const TEACHER_PASSWORD = '25808';
 
 // ============================================================
-// ✅ إعدادات التيليجرام (مع التوكن و Chat ID)
+// ✅ إعدادات التيليجرام
 // ============================================================
-
 const TELEGRAM_CONFIG = {
-    botToken: '8983761376:AAFDpzLJQcAVK7dallZ7Wa9K1tAljPBs_8s',  // ✅ التوكن
-    chatId: '5337377165',                                         // ✅ Chat ID
-    isConfigured: true                                            // ✅ مفعل
+    botToken: '8983761376:AAFDpzLJQcAVK7dallZ7Wa9K1tAljPBs_8s',
+    chatId: '5337377165',
+    isConfigured: true
 };
 
-// ============================================================
-// تحميل الإعدادات من التخزين المحلي
-// ============================================================
-function loadTelegramConfig() {
-    const saved = localStorage.getItem('telegram_config');
-    if (saved) {
-        try {
-            const config = JSON.parse(saved);
-            TELEGRAM_CONFIG.botToken = config.botToken || TELEGRAM_CONFIG.botToken;
-            TELEGRAM_CONFIG.chatId = config.chatId || TELEGRAM_CONFIG.chatId;
-            TELEGRAM_CONFIG.isConfigured = !!(TELEGRAM_CONFIG.botToken && TELEGRAM_CONFIG.chatId);
-        } catch (e) {
-            console.error('خطأ في تحميل إعدادات التيليجرام', e);
-        }
-    }
-    updateTelegramButtons();
-}
-
-// ============================================================
-// حفظ إعدادات التيليجرام
-// ============================================================
-function saveTelegramConfig(botToken, chatId) {
-    TELEGRAM_CONFIG.botToken = botToken;
-    TELEGRAM_CONFIG.chatId = chatId;
-    TELEGRAM_CONFIG.isConfigured = !!(botToken && chatId);
-    localStorage.setItem('telegram_config', JSON.stringify({
-        botToken: botToken,
-        chatId: chatId
-    }));
-    updateTelegramButtons();
-    showToast('✅ تم حفظ إعدادات التيليجرام', 'success');
-}
-
-// ============================================================
-// تحديث حالة الأزرار
-// ============================================================
-function updateTelegramButtons() {
-    const sendBtn = document.getElementById('sendTelegramBtn');
-    const setupBtn = document.getElementById('setupTelegramBtn');
-    
-    if (sendBtn) {
-        sendBtn.disabled = !TELEGRAM_CONFIG.isConfigured || STATE.lastResults.length === 0;
-    }
-    
-    if (setupBtn) {
-        setupBtn.textContent = TELEGRAM_CONFIG.isConfigured ? '🔄 تحديث الإعدادات' : '⚙️ إعداد البوت';
-    }
-}
-
-// ============================================================
-// نافذة إعداد البوت
-// ============================================================
-function setupTelegram() {
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        position: fixed;
-        inset: 0;
-        background: rgba(0,0,0,0.8);
-        z-index: 9999;
-        display: grid;
-        place-items: center;
-        padding: 20px;
-        backdrop-filter: blur(8px);
-    `;
-    
-    modal.innerHTML = `
-        <div style="
-            background: #0b1422;
-            border: 1px solid #1d3048;
-            border-radius: 20px;
-            padding: 30px;
-            max-width: 450px;
-            width: 100%;
-            box-shadow: 0 30px 100px rgba(0,0,0,0.8);
-        ">
-            <h2 style="color:#5ce1ff;margin:0 0 8px;">🤖 إعداد بوت التيليجرام</h2>
-            <p style="color:#8293aa;font-size:13px;margin-bottom:20px;">
-                أدخل توكن البوت ومعرف الشات لإرسال كل نتيجة على حدة
-            </p>
-            
-            <div style="margin-bottom:12px;">
-                <label style="display:block;font-size:12px;color:#aebdd0;margin-bottom:4px;">🤖 توكن البوت</label>
-                <input id="telegramBotToken" type="text" 
-                    value="${TELEGRAM_CONFIG.botToken}"
-                    placeholder="مثال: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
-                    style="width:100%;padding:11px 14px;border-radius:11px;border:1px solid #263d58;background:#080f1a;color:#fff;font-size:14px;outline:none;">
-            </div>
-            
-            <div style="margin-bottom:20px;">
-                <label style="display:block;font-size:12px;color:#aebdd0;margin-bottom:4px;">📱 معرف الشات (Chat ID)</label>
-                <input id="telegramChatId" type="text" 
-                    value="${TELEGRAM_CONFIG.chatId}"
-                    placeholder="مثال: 123456789"
-                    style="width:100%;padding:11px 14px;border-radius:11px;border:1px solid #263d58;background:#080f1a;color:#fff;font-size:14px;outline:none;">
-            </div>
-            
-            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-                <button id="telegramSaveBtn" style="
-                    background:linear-gradient(135deg,#2588ff,#0b5ed6);
-                    color:#fff;
-                    border:none;
-                    padding:12px;
-                    border-radius:11px;
-                    font-weight:700;
-                    font-size:14px;
-                    cursor:pointer;
-                ">💾 حفظ الإعدادات</button>
-                <button id="telegramCloseBtn" style="
-                    background:rgba(255,255,255,0.06);
-                    border:1px solid rgba(255,255,255,0.08);
-                    color:#fff;
-                    padding:12px;
-                    border-radius:11px;
-                    font-weight:700;
-                    font-size:14px;
-                    cursor:pointer;
-                ">❌ إلغاء</button>
-            </div>
-            
-            <p id="telegramError" style="color:#ff7187;font-size:12px;margin-top:10px;"></p>
-            
-            <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1d3048;font-size:11px;color:#8293aa;">
-                💡 <a href="https://t.me/BotFather" target="_blank" style="color:#5ce1ff;">@BotFather</a> لإنشاء بوت جديد<br>
-                💡 <a href="https://t.me/userinfobot" target="_blank" style="color:#5ce1ff;">@userinfobot</a> لمعرفة معرف الشات
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(modal);
-    
-    modal.querySelector('#telegramSaveBtn').addEventListener('click', function() {
-        const botToken = modal.querySelector('#telegramBotToken').value.trim();
-        const chatId = modal.querySelector('#telegramChatId').value.trim();
-        const errorEl = modal.querySelector('#telegramError');
-        
-        errorEl.textContent = '';
-        
-        if (!botToken || !chatId) {
-            errorEl.textContent = '❌ الرجاء إدخال التوكن ومعرف الشات';
-            return;
-        }
-        
-        saveTelegramConfig(botToken, chatId);
-        modal.remove();
-        showToast('✅ تم حفظ إعدادات التيليجرام', 'success');
-    });
-    
-    modal.querySelector('#telegramCloseBtn').addEventListener('click', function() {
-        modal.remove();
-    });
-    
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) modal.remove();
-    });
-}
-
-// ============================================================
-// دالة إرسال كل نتيجة على حدة للتيليجرام
-// ============================================================
-async function sendResultsToTelegram() {
-    if (!TELEGRAM_CONFIG.isConfigured) {
-        showToast('⚠️ قم بإعداد البوت أولاً', 'error');
-        return;
-    }
-    
-    if (!STATE.lastResults.length) {
-        showToast('📭 لا توجد نتائج لإرسالها', 'error');
-        return;
-    }
-    
-    const code = resultsCodeInput.value.trim();
-    if (!code) {
-        showToast('📝 اكتب كود الامتحان أولاً', 'error');
-        return;
-    }
-    
-    const sendBtn = document.getElementById('sendTelegramBtn');
-    sendBtn.disabled = true;
-    sendBtn.textContent = '⏳ جاري الإرسال...';
-    
-    try {
-        let successCount = 0;
-        let failCount = 0;
-        
-        for (let i = 0; i < STATE.lastResults.length; i++) {
-            const row = STATE.lastResults[i];
-            const score = row.score ?? 0;
-            const total = row.total ?? row.question_count ?? '-';
-            const status = row.submitted_at ? '✅ تم التسليم' : '⏳ لم يتم التسليم';
-            const submittedTime = row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-';
-            const name = row.student_name || 'غير معروف';
-            
-            let message = `🎓 *نتيجة الطالب*\n\n`;
-            message += `━━━━━━━━━━━━━━━━━━━━\n`;
-            message += `👤 *الطالب:* ${name}\n`;
-            message += `🔑 *كود الامتحان:* ${code}\n`;
-            message += `📊 *الدرجة:* ${score} / ${total}\n`;
-            message += `📌 *الحالة:* ${status}\n`;
-            message += `🕐 *وقت التسليم:* ${submittedTime}\n`;
-            message += `━━━━━━━━━━━━━━━━━━━━\n`;
-            message += `📅 *تاريخ التقرير:* ${new Date().toLocaleString('ar-EG')}\n`;
-            message += `🏫 *أستاذ حسن عيسى*`;
-            
-            const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
-            
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    chat_id: TELEGRAM_CONFIG.chatId,
-                    text: message,
-                    parse_mode: 'Markdown',
-                    disable_web_page_preview: true
-                })
-            });
-            
-            const result = await response.json();
-            
-            if (result.ok) {
-                successCount++;
-            } else {
-                failCount++;
-                console.error('خطأ في إرسال نتيجة:', result);
-            }
-            
-            if (i < STATE.lastResults.length - 1) {
-                await new Promise(resolve => setTimeout(resolve, 500));
-            }
-        }
-        
-        let summary = `📊 *ملخص النتائج*\n\n`;
-        summary += `━━━━━━━━━━━━━━━━━━━━\n`;
-        summary += `🔑 *كود الامتحان:* ${code}\n`;
-        summary += `📊 *عدد الطلاب:* ${STATE.lastResults.length}\n`;
-        summary += `✅ *تم الإرسال:* ${successCount}\n`;
-        summary += `❌ *فشل الإرسال:* ${failCount}\n`;
-        summary += `🏆 *أعلى درجة:* ${Math.max(...STATE.lastResults.map(r => r.score ?? 0))}\n`;
-        summary += `━━━━━━━━━━━━━━━━━━━━\n`;
-        summary += `📅 *تاريخ التقرير:* ${new Date().toLocaleString('ar-EG')}`;
-        
-        const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
-        await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                chat_id: TELEGRAM_CONFIG.chatId,
-                text: summary,
-                parse_mode: 'Markdown',
-                disable_web_page_preview: true
-            })
-        });
-        
-        showToast(`✅ تم إرسال ${successCount} نتيجة للتيليجرام`, 'success');
-        
-    } catch (error) {
-        console.error('Telegram error:', error);
-        showToast(`❌ فشل الإرسال: ${error.message}`, 'error');
-    } finally {
-        sendBtn.disabled = false;
-        sendBtn.textContent = '📤 إرسال للتيليجرام';
-    }
-}
-
-// ============================================================
-// باقي دوال المدرس
-// ============================================================
-
+// ===== STATE =====
 const STATE = {
     questions: [],
     lastResults: [],
     lastResultsCode: '',
-    pdfDownloadedForCode: '',
     isAuthenticated: false
 };
 
-// عناصر الصفحة
+// ===== عناصر الصفحة =====
 const loginSection = document.getElementById('login');
 const appSection = document.getElementById('app');
 const usernameInput = document.getElementById('username');
@@ -1000,8 +735,8 @@ const resultsCodeInput = document.getElementById('resultsCode');
 const loadResultsBtn = document.getElementById('loadResultsBtn');
 const resultsBody = document.getElementById('resultsBody');
 const resultsError = document.getElementById('resultsError');
-const downloadPdfBtn = document.getElementById('downloadPdfBtn');
 const deleteExamBtn = document.getElementById('deleteExamBtn');
+const deleteAllBtn = document.getElementById('deleteAllBtn');
 
 const detailsModal = document.getElementById('detailsModal');
 const modalContent = document.getElementById('modalContent');
@@ -1009,7 +744,7 @@ const closeModalBtn = document.getElementById('closeModalBtn');
 
 const toast = document.getElementById('toast');
 
-// دوال مساعدة
+// ===== دوال مساعدة =====
 function showToast(message, type = 'info', duration = 3000) {
     if (!toast) return;
     toast.textContent = message;
@@ -1038,7 +773,9 @@ function escapeHTML(text) {
     });
 }
 
+// ============================================================
 // المصادقة
+// ============================================================
 function handleLogin() {
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
@@ -1087,7 +824,9 @@ function checkSession() {
     return false;
 }
 
+// ============================================================
 // الأسئلة
+// ============================================================
 function addQuestion() {
     STATE.questions.push({
         text: '',
@@ -1179,7 +918,9 @@ window.removeQuestion = function(index) {
     renderQuestions();
 };
 
+// ============================================================
 // إنشاء الامتحان
+// ============================================================
 async function createExam() {
     const title = examTitleInput.value.trim();
     const duration = Number(durationInput.value);
@@ -1278,7 +1019,9 @@ async function createExam() {
     }
 }
 
-// النتائج
+// ============================================================
+// النتائج + إرسال تلقائي للتيليجرام
+// ============================================================
 async function loadResults() {
     const code = resultsCodeInput.value.trim();
     resultsError.textContent = '';
@@ -1306,13 +1049,17 @@ async function loadResults() {
         STATE.lastResultsCode = code;
         
         renderResults(STATE.lastResults);
-        
-        downloadPdfBtn.disabled = STATE.lastResults.length === 0;
-        deleteExamBtn.disabled = true;
         updateTelegramButtons();
+        updateDeleteButtons();
         
         if (STATE.lastResults.length > 0) {
             showToast(`📊 تم تحميل ${STATE.lastResults.length} نتيجة`, 'success');
+            
+            if (TELEGRAM_CONFIG.isConfigured) {
+                await sendResultsToTelegram();
+            } else {
+                showToast('⚠️ قم بإعداد البوت أولاً', 'warning');
+            }
         } else {
             showToast('📭 لا توجد نتائج', 'info');
         }
@@ -1331,7 +1078,7 @@ function renderResults(rows) {
     if (!resultsBody) return;
     
     if (!rows.length) {
-        resultsBody.innerHTML = `<tr><td colspan="6" class="empty">📭 لا توجد نتائج حتى الآن</td></tr>`;
+        resultsBody.innerHTML = `<tr><td colspan="5" class="empty">📭 لا توجد نتائج حتى الآن</td></tr>`;
         return;
     }
     
@@ -1348,155 +1095,259 @@ function renderResults(rows) {
                 <td><strong style="color:#5ce1ff;">${escapeHTML(score)}</strong> / ${escapeHTML(total)}</td>
                 <td>${escapeHTML(submitted)}</td>
                 <td>${status}</td>
-                <td>
-                    <button class="btn-secondary" onclick="window.showDetails(${i})" style="padding:4px 10px;font-size:11px;">📋 تفاصيل</button>
-                </td>
             </tr>
         `;
     }).join('');
 }
 
-window.showDetails = function(index) {
-    const row = STATE.lastResults[index];
-    if (!row) return;
+// ============================================================
+// التيليجرام
+// ============================================================
+function updateTelegramButtons() {
+    const sendBtn = document.getElementById('sendTelegramBtn');
+    if (sendBtn) {
+        sendBtn.disabled = !TELEGRAM_CONFIG.isConfigured || STATE.lastResults.length === 0;
+    }
+}
+
+function setupTelegram() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        backdrop-filter: blur(8px);
+    `;
     
-    modalContent.innerHTML = `
-        <div style="padding:6px 0;">
-            <div style="background:rgba(255,255,255,0.04);padding:14px;border-radius:11px;margin:6px 0;">
-                <p style="margin:6px 0;"><strong>👤 الطالب:</strong> ${escapeHTML(row.student_name)}</p>
-                <p style="margin:6px 0;"><strong>📊 الدرجة:</strong> <span style="color:#5ce1ff;font-size:20px;font-weight:900;">${escapeHTML(row.score ?? 0)}</span> / ${escapeHTML(row.total ?? row.question_count ?? '-')}</p>
-                <p style="margin:6px 0;"><strong>🕐 وقت التسليم:</strong> ${row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-'}</p>
+    modal.innerHTML = `
+        <div style="
+            background: #0b1422;
+            border: 1px solid #1d3048;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+        ">
+            <h2 style="color:#5ce1ff;margin:0 0 8px;">🤖 إعداد بوت التيليجرام</h2>
+            <p style="color:#8293aa;font-size:13px;margin-bottom:20px;">
+                أدخل توكن البوت ومعرف الشات
+            </p>
+            
+            <div style="margin-bottom:12px;">
+                <label style="display:block;font-size:12px;color:#aebdd0;margin-bottom:4px;">🤖 توكن البوت</label>
+                <input id="telegramBotToken" type="text" 
+                    value="${TELEGRAM_CONFIG.botToken}"
+                    placeholder="مثال: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
+                    style="width:100%;padding:11px 14px;border-radius:11px;border:1px solid #263d58;background:#080f1a;color:#fff;font-size:14px;outline:none;">
+            </div>
+            
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:12px;color:#aebdd0;margin-bottom:4px;">📱 معرف الشات (Chat ID)</label>
+                <input id="telegramChatId" type="text" 
+                    value="${TELEGRAM_CONFIG.chatId}"
+                    placeholder="مثال: 123456789"
+                    style="width:100%;padding:11px 14px;border-radius:11px;border:1px solid #263d58;background:#080f1a;color:#fff;font-size:14px;outline:none;">
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <button id="telegramSaveBtn" style="
+                    background:linear-gradient(135deg,#2588ff,#0b5ed6);
+                    color:#fff;
+                    border:none;
+                    padding:12px;
+                    border-radius:11px;
+                    font-weight:700;
+                    font-size:14px;
+                    cursor:pointer;
+                ">💾 حفظ الإعدادات</button>
+                <button id="telegramCloseBtn" style="
+                    background:rgba(255,255,255,0.06);
+                    border:1px solid rgba(255,255,255,0.08);
+                    color:#fff;
+                    padding:12px;
+                    border-radius:11px;
+                    font-weight:700;
+                    font-size:14px;
+                    cursor:pointer;
+                ">❌ إلغاء</button>
+            </div>
+            
+            <p id="telegramError" style="color:#ff7187;font-size:12px;margin-top:10px;"></p>
+            
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1d3048;font-size:11px;color:#8293aa;">
+                💡 <a href="https://t.me/BotFather" target="_blank" style="color:#5ce1ff;">@BotFather</a> لإنشاء بوت جديد<br>
+                💡 <a href="https://t.me/userinfobot" target="_blank" style="color:#5ce1ff;">@userinfobot</a> لمعرفة معرف الشات
             </div>
         </div>
     `;
     
-    show(detailsModal);
-};
-
-// PDF
-function downloadPDF() {
-    const code = resultsCodeInput.value.trim();
+    document.body.appendChild(modal);
     
-    if (!code) {
-        showToast('📝 اكتب كود الامتحان أولاً.', 'error');
+    modal.querySelector('#telegramSaveBtn').addEventListener('click', function() {
+        const botToken = modal.querySelector('#telegramBotToken').value.trim();
+        const chatId = modal.querySelector('#telegramChatId').value.trim();
+        const errorEl = modal.querySelector('#telegramError');
+        
+        errorEl.textContent = '';
+        
+        if (!botToken || !chatId) {
+            errorEl.textContent = '❌ الرجاء إدخال التوكن ومعرف الشات';
+            return;
+        }
+        
+        TELEGRAM_CONFIG.botToken = botToken;
+        TELEGRAM_CONFIG.chatId = chatId;
+        TELEGRAM_CONFIG.isConfigured = true;
+        localStorage.setItem('telegram_config', JSON.stringify({ botToken, chatId }));
+        updateTelegramButtons();
+        modal.remove();
+        showToast('✅ تم حفظ إعدادات التيليجرام', 'success');
+    });
+    
+    modal.querySelector('#telegramCloseBtn').addEventListener('click', function() {
+        modal.remove();
+    });
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+async function sendResultsToTelegram() {
+    if (!TELEGRAM_CONFIG.isConfigured) {
+        showToast('⚠️ قم بإعداد البوت أولاً', 'error');
         return;
     }
     
     if (!STATE.lastResults.length) {
-        showToast('📭 لا توجد نتائج لتصديرها.', 'error');
+        showToast('📭 لا توجد نتائج لإرسالها', 'error');
         return;
     }
     
-    if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
-        showToast('❌ تعذر تحميل نظام PDF.', 'error');
+    const code = resultsCodeInput.value.trim();
+    if (!code) {
+        showToast('📝 اكتب كود الامتحان أولاً', 'error');
         return;
+    }
+    
+    const sendBtn = document.getElementById('sendTelegramBtn');
+    if (sendBtn) {
+        sendBtn.disabled = true;
+        sendBtn.textContent = '⏳ جاري الإرسال...';
     }
     
     try {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
+        let successCount = 0;
+        let failCount = 0;
         
-        doc.setFontSize(20);
-        doc.setTextColor(37, 136, 255);
-        doc.text('نتائج امتحان أستاذ حسن عيسى', 105, 18, { align: 'center' });
-        
-        doc.setFontSize(11);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`🔑 كود الامتحان: ${code}`, 105, 26, { align: 'center' });
-        
-        const now = new Date();
-        const dateStr = now.toLocaleString('ar-EG', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-        doc.text(`📅 تاريخ التصدير: ${dateStr}`, 105, 32, { align: 'center' });
-        
-        const rows = STATE.lastResults.map((row, i) => {
+        for (let i = 0; i < STATE.lastResults.length; i++) {
+            const row = STATE.lastResults[i];
             const score = row.score ?? 0;
             const total = row.total ?? row.question_count ?? '-';
-            const submitted = row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-';
             const status = row.submitted_at ? '✅ تم التسليم' : '⏳ لم يتم التسليم';
+            const submittedTime = row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-';
+            const name = row.student_name || 'غير معروف';
             
-            return [
-                String(i + 1),
-                String(row.student_name || ''),
-                `${score} / ${total}`,
-                submitted,
-                status
-            ];
-        });
-        
-        doc.autoTable({
-            startY: 38,
-            head: [['#', 'الطالب', 'الدرجة', 'وقت التسليم', 'الحالة']],
-            body: rows,
-            styles: {
-                fontSize: 9,
-                cellPadding: 3,
-                halign: 'center',
-                valign: 'middle'
-            },
-            headStyles: {
-                fillColor: [37, 136, 255],
-                textColor: [255, 255, 255],
-                fontStyle: 'bold',
-                halign: 'center'
-            },
-            alternateRowStyles: {
-                fillColor: [245, 245, 245]
-            },
-            columnStyles: {
-                0: { cellWidth: 15 },
-                1: { cellWidth: 'auto' },
-                2: { cellWidth: 30 },
-                3: { cellWidth: 45 },
-                4: { cellWidth: 35 }
+            let message = `🎓 *نتيجة الطالب*\n\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `👤 *الطالب:* ${name}\n`;
+            message += `🔑 *كود الامتحان:* ${code}\n`;
+            message += `📊 *الدرجة:* ${score} / ${total}\n`;
+            message += `📌 *الحالة:* ${status}\n`;
+            message += `🕐 *وقت التسليم:* ${submittedTime}\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `📅 *تاريخ التقرير:* ${new Date().toLocaleString('ar-EG')}\n`;
+            message += `🏫 *أستاذ حسن عيسى*`;
+            
+            const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CONFIG.chatId,
+                    text: message,
+                    parse_mode: 'Markdown',
+                    disable_web_page_preview: true
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.ok) {
+                successCount++;
+            } else {
+                failCount++;
+                console.error('خطأ في إرسال نتيجة:', result);
             }
-        });
-        
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-            doc.setPage(i);
-            doc.setFontSize(8);
-            doc.setTextColor(150, 150, 150);
-            doc.text(
-                `© أستاذ حسن عيسى - صفحة ${i} من ${pageCount}`,
-                105,
-                285,
-                { align: 'center' }
-            );
+            
+            if (i < STATE.lastResults.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
         }
         
-        doc.save(`نتائج-الامتحان-${code}.pdf`);
+        let summary = `📊 *ملخص النتائج*\n\n`;
+        summary += `━━━━━━━━━━━━━━━━━━━━\n`;
+        summary += `🔑 *كود الامتحان:* ${code}\n`;
+        summary += `📊 *عدد الطلاب:* ${STATE.lastResults.length}\n`;
+        summary += `✅ *تم الإرسال:* ${successCount}\n`;
+        summary += `❌ *فشل الإرسال:* ${failCount}\n`;
+        summary += `🏆 *أعلى درجة:* ${Math.max(...STATE.lastResults.map(r => r.score ?? 0))}\n`;
+        summary += `━━━━━━━━━━━━━━━━━━━━\n`;
+        summary += `📅 *تاريخ التقرير:* ${new Date().toLocaleString('ar-EG')}`;
         
-        STATE.pdfDownloadedForCode = code;
-        deleteExamBtn.disabled = false;
-        showToast('📄 تم تنزيل PDF بنجاح', 'success');
+        const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+        await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CONFIG.chatId,
+                text: summary,
+                parse_mode: 'Markdown',
+                disable_web_page_preview: true
+            })
+        });
+        
+        showToast(`✅ تم إرسال ${successCount} نتيجة للتيليجرام`, 'success');
         
     } catch (error) {
-        console.error('PDF error:', error);
-        showToast('❌ حدث خطأ أثناء إنشاء PDF: ' + error.message, 'error');
+        console.error('Telegram error:', error);
+        showToast(`❌ فشل الإرسال: ${error.message}`, 'error');
+    } finally {
+        if (sendBtn) {
+            sendBtn.disabled = false;
+            sendBtn.textContent = '📤 إرسال يدوي';
+        }
     }
 }
 
-// حذف الامتحان
+// ============================================================
+// 🗑️ حذف البيانات
+// ============================================================
+
+function updateDeleteButtons() {
+    if (deleteExamBtn) {
+        deleteExamBtn.disabled = !STATE.lastResultsCode || STATE.lastResults.length === 0;
+    }
+}
+
+// ===== حذف امتحان معين =====
 async function deleteExam() {
     const code = STATE.lastResultsCode || resultsCodeInput.value.trim();
     
-    if (!code) { showToast('📝 اكتب كود الامتحان.', 'error'); return; }
-    if (STATE.pdfDownloadedForCode !== code) {
-        showToast('⚠️ يجب تنزيل PDF أولاً.', 'error');
+    if (!code) {
+        showToast('📝 اكتب كود الامتحان.', 'error');
         return;
     }
     
-    if (!confirm(`⚠️ تحذير!\n\nسيتم حذف الامتحان (${code}) وجميع نتائجه نهائيًا.\n\nتأكد أنك احتفظت بملف PDF.\n\nهل تريد المتابعة؟`)) return;
+    if (!confirm(`⚠️ تحذير!\n\nسيتم حذف الامتحان (${code}) وجميع نتائجه نهائيًا.\n\nهل أنت متأكد؟`)) {
+        return;
+    }
     
     const typedCode = prompt(`للتأكيد، اكتب كود الامتحان:\n${code}`);
     if (typedCode === null) return;
@@ -1521,12 +1372,9 @@ async function deleteExam() {
         
         STATE.lastResults = [];
         STATE.lastResultsCode = '';
-        STATE.pdfDownloadedForCode = '';
         renderResults([]);
         resultsCodeInput.value = '';
-        downloadPdfBtn.disabled = true;
         deleteExamBtn.disabled = true;
-        hide(createdExamDiv);
         showToast('🗑️ تم حذف الامتحان بنجاح', 'success');
         
     } catch (error) {
@@ -1537,7 +1385,57 @@ async function deleteExam() {
     }
 }
 
+// ===== 💣 حذف كل البيانات =====
+async function deleteAllData() {
+    if (!confirm(`💣 تحذير نهائي!\n\nسيتم حذف جميع الامتحانات والأسئلة ونتائج الطلاب.\n\nهذا الإجراء لا يمكن التراجع عنه!\n\nهل أنت متأكد 100%؟`)) {
+        return;
+    }
+    
+    const confirmText = prompt('للتأكيد، اكتب: حذف شامل');
+    if (confirmText !== 'حذف شامل') {
+        showToast('❌ لم يتم الحذف.', 'error');
+        return;
+    }
+    
+    deleteAllBtn.disabled = true;
+    const oldText = deleteAllBtn.textContent;
+    deleteAllBtn.textContent = '⏳ جاري الحذف...';
+    
+    try {
+        // 1. حذف الإجابات
+        await supabaseClient.from('public_answers').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        
+        // 2. حذف المحاولات
+        await supabaseClient.from('public_attempts').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        
+        // 3. حذف الأسئلة
+        await supabaseClient.from('exam_questions').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        
+        // 4. حذف الامتحانات
+        await supabaseClient.from('public_exams').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        
+        STATE.lastResults = [];
+        STATE.lastResultsCode = '';
+        STATE.questions = [];
+        renderResults([]);
+        renderQuestions();
+        resultsCodeInput.value = '';
+        deleteExamBtn.disabled = true;
+        
+        showToast('💣 تم حذف كل البيانات بنجاح!', 'success');
+        
+    } catch (error) {
+        console.error('Delete all error:', error);
+        showToast(`❌ ${error.message || 'فشل الحذف'}`, 'error');
+    } finally {
+        deleteAllBtn.disabled = false;
+        deleteAllBtn.textContent = oldText;
+    }
+}
+
+// ============================================================
 // نسخ الرابط
+// ============================================================
 async function copyLink() {
     if (!shareLinkInput || !shareLinkInput.value.trim()) return;
     try {
@@ -1552,23 +1450,9 @@ async function copyLink() {
     showToast('📋 تم نسخ الرابط', 'success');
 }
 
-// إغلاق المودال
-function closeModal() {
-    hide(detailsModal);
-}
-
-// تحميل الامتحان المحفوظ
-function loadSavedExam() {
-    const code = localStorage.getItem('hasan_last_exam_code');
-    if (code && resultsCodeInput) {
-        resultsCodeInput.value = code;
-    }
-}
-
 // ============================================================
 // ربط الأزرار
 // ============================================================
-
 loginBtn.addEventListener('click', handleLogin);
 
 usernameInput.addEventListener('keydown', function(e) {
@@ -1588,13 +1472,14 @@ resultsCodeInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') loadResults();
 });
 
-downloadPdfBtn.addEventListener('click', downloadPDF);
-deleteExamBtn.addEventListener('click', deleteExam);
 copyLinkBtn.addEventListener('click', copyLink);
 
-// ✅ ربط أزرار التيليجرام
 document.getElementById('setupTelegramBtn')?.addEventListener('click', setupTelegram);
 document.getElementById('sendTelegramBtn')?.addEventListener('click', sendResultsToTelegram);
+
+// ✅ أزرار الحذف
+deleteExamBtn?.addEventListener('click', deleteExam);
+deleteAllBtn?.addEventListener('click', deleteAllData);
 
 newExamBtn.addEventListener('click', function() {
     STATE.questions = [];
@@ -1607,15 +1492,17 @@ newExamBtn.addEventListener('click', function() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-closeModalBtn.addEventListener('click', closeModal);
+closeModalBtn.addEventListener('click', function() {
+    hide(detailsModal);
+});
+
 detailsModal.addEventListener('click', function(e) {
-    if (e.target === detailsModal) closeModal();
+    if (e.target === detailsModal) hide(detailsModal);
 });
 
 // ============================================================
 // التهيئة
 // ============================================================
-
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM تحمّل');
     
@@ -1624,8 +1511,14 @@ document.addEventListener('DOMContentLoaded', function() {
         hide(appSection);
     }
     renderQuestions();
-    loadSavedExam();
-    loadTelegramConfig();
+    
+    const code = localStorage.getItem('hasan_last_exam_code');
+    if (code && resultsCodeInput) {
+        resultsCodeInput.value = code;
+    }
+    
+    updateTelegramButtons();
+    updateDeleteButtons();
 });
 
 console.log('✅ teacher.js تحمّل بالكامل');
