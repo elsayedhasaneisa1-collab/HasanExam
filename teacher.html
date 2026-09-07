@@ -6,7 +6,7 @@
     <title>لوحة أستاذ حسن عيسى</title>
     
     <style>
-        /* ===== جميع التنسيقات ===== */
+        /* ===== كل الـ CSS ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
@@ -663,11 +663,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- ============================================================
-     كل الـ JavaScript هنا
+     كل الـ JavaScript
 ============================================================ -->
 <script>
 // ============================================================
-// teacher.js - مع التيليجرام
+// teacher.js - النسخة النهائية مع التيليجرام
 // ============================================================
 
 console.log('🚀 teacher.js بدأ التحميل');
@@ -684,25 +684,26 @@ const TEACHER_USERNAME = 'Hasan';
 const TEACHER_PASSWORD = '25808';
 
 // ============================================================
-// إعدادات التيليجرام
+// ✅ إعدادات التيليجرام (مع التوكن و Chat ID)
 // ============================================================
 
-// 🔴 مهم: ضع التوكن ومعرف الشات هنا أو من خلال واجهة الإعدادات
 const TELEGRAM_CONFIG = {
-    botToken: '',  8983761376:AAFDpzLJQcAVK7dallZ7Wa9K1tAljPBs_8s
-    chatId: '',    5337377165
-    isConfigured: false
+    botToken: '8983761376:AAFDpzLJQcAVK7dallZ7Wa9K1tAljPBs_8s',  // ✅ التوكن
+    chatId: '5337377165',                                         // ✅ Chat ID
+    isConfigured: true                                            // ✅ مفعل
 };
 
+// ============================================================
 // تحميل الإعدادات من التخزين المحلي
+// ============================================================
 function loadTelegramConfig() {
     const saved = localStorage.getItem('telegram_config');
     if (saved) {
         try {
             const config = JSON.parse(saved);
-            TELEGRAM_CONFIG.botToken = config.botToken || '';
-            TELEGRAM_CONFIG.chatId = config.chatId || '';
-            TELEGRAM_CONFIG.isConfigured = !!(config.botToken && config.chatId);
+            TELEGRAM_CONFIG.botToken = config.botToken || TELEGRAM_CONFIG.botToken;
+            TELEGRAM_CONFIG.chatId = config.chatId || TELEGRAM_CONFIG.chatId;
+            TELEGRAM_CONFIG.isConfigured = !!(TELEGRAM_CONFIG.botToken && TELEGRAM_CONFIG.chatId);
         } catch (e) {
             console.error('خطأ في تحميل إعدادات التيليجرام', e);
         }
@@ -710,7 +711,9 @@ function loadTelegramConfig() {
     updateTelegramButtons();
 }
 
+// ============================================================
 // حفظ إعدادات التيليجرام
+// ============================================================
 function saveTelegramConfig(botToken, chatId) {
     TELEGRAM_CONFIG.botToken = botToken;
     TELEGRAM_CONFIG.chatId = chatId;
@@ -723,7 +726,9 @@ function saveTelegramConfig(botToken, chatId) {
     showToast('✅ تم حفظ إعدادات التيليجرام', 'success');
 }
 
+// ============================================================
 // تحديث حالة الأزرار
+// ============================================================
 function updateTelegramButtons() {
     const sendBtn = document.getElementById('sendTelegramBtn');
     const setupBtn = document.getElementById('setupTelegramBtn');
@@ -740,7 +745,6 @@ function updateTelegramButtons() {
 // ============================================================
 // نافذة إعداد البوت
 // ============================================================
-
 function setupTelegram() {
     const modal = document.createElement('div');
     modal.style.cssText = `
@@ -812,8 +816,7 @@ function setupTelegram() {
             
             <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1d3048;font-size:11px;color:#8293aa;">
                 💡 <a href="https://t.me/BotFather" target="_blank" style="color:#5ce1ff;">@BotFather</a> لإنشاء بوت جديد<br>
-                💡 <a href="https://t.me/userinfobot" target="_blank" style="color:#5ce1ff;">@userinfobot</a> لمعرفة معرف الشات<br>
-                📌 سيتم إرسال <strong>كل نتيجة على حدة</strong> + ملخص نهائي
+                💡 <a href="https://t.me/userinfobot" target="_blank" style="color:#5ce1ff;">@userinfobot</a> لمعرفة معرف الشات
             </div>
         </div>
     `;
@@ -849,7 +852,6 @@ function setupTelegram() {
 // ============================================================
 // دالة إرسال كل نتيجة على حدة للتيليجرام
 // ============================================================
-
 async function sendResultsToTelegram() {
     if (!TELEGRAM_CONFIG.isConfigured) {
         showToast('⚠️ قم بإعداد البوت أولاً', 'error');
@@ -875,7 +877,6 @@ async function sendResultsToTelegram() {
         let successCount = 0;
         let failCount = 0;
         
-        // ===== إرسال كل نتيجة على حدة =====
         for (let i = 0; i < STATE.lastResults.length; i++) {
             const row = STATE.lastResults[i];
             const score = row.score ?? 0;
@@ -884,7 +885,6 @@ async function sendResultsToTelegram() {
             const submittedTime = row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-';
             const name = row.student_name || 'غير معروف';
             
-            // ===== بناء رسالة كل طالب =====
             let message = `🎓 *نتيجة الطالب*\n\n`;
             message += `━━━━━━━━━━━━━━━━━━━━\n`;
             message += `👤 *الطالب:* ${name}\n`;
@@ -896,7 +896,6 @@ async function sendResultsToTelegram() {
             message += `📅 *تاريخ التقرير:* ${new Date().toLocaleString('ar-EG')}\n`;
             message += `🏫 *أستاذ حسن عيسى*`;
             
-            // ===== إرسال للتيليجرام =====
             const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
             
             const response = await fetch(url, {
@@ -921,13 +920,11 @@ async function sendResultsToTelegram() {
                 console.error('خطأ في إرسال نتيجة:', result);
             }
             
-            // ===== تأخير بسيط بين كل رسالة وأخرى (تجنب حظر البوت) =====
             if (i < STATE.lastResults.length - 1) {
                 await new Promise(resolve => setTimeout(resolve, 500));
             }
         }
         
-        // ===== إرسال ملخص =====
         let summary = `📊 *ملخص النتائج*\n\n`;
         summary += `━━━━━━━━━━━━━━━━━━━━\n`;
         summary += `🔑 *كود الامتحان:* ${code}\n`;
