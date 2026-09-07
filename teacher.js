@@ -4,50 +4,37 @@ const SUPABASE_URL =
 const SUPABASE_KEY =
   "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc";
 
+const client = supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
 
-/* =====================================================
-   SUPABASE
-===================================================== */
+const $ = (id) => document.getElementById(id);
 
-const client =
-  supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
+let teacherUsername = "";
+let teacherPassword = "";
+
+let questions = [];
+let lastResults = [];
+let lastResultsCode = "";
+let pdfDownloadedForCode = "";
 
 
 /* =====================================================
    HELPERS
 ===================================================== */
 
-const $ = (id) =>
-  document.getElementById(id);
-
-
 function show(id) {
-
   const el = $(id);
-
-  if (el) {
-    el.classList.remove("hidden");
-  }
-
+  if (el) el.classList.remove("hidden");
 }
-
 
 function hide(id) {
-
   const el = $(id);
-
-  if (el) {
-    el.classList.add("hidden");
-  }
-
+  if (el) el.classList.add("hidden");
 }
 
-
 function esc(value) {
-
   return String(value ?? "").replace(
     /[&<>"']/g,
     (char) => ({
@@ -58,54 +45,6 @@ function esc(value) {
       "'": "&#039;"
     })[char]
   );
-
-}
-
-
-/* =====================================================
-   STATE
-===================================================== */
-
-let teacherUsername = "";
-let teacherPassword = "";
-
-let questions = [];
-
-let lastResults = [];
-
-
-/* =====================================================
-   OPEN DASHBOARD
-===================================================== */
-
-function openDashboard() {
-
-  hide("login");
-
-  show("app");
-
-  const app =
-    $("app");
-
-  if (app) {
-
-    app.removeAttribute(
-      "inert"
-    );
-
-    app.setAttribute(
-      "aria-hidden",
-      "false"
-    );
-
-  }
-
-  document.body.classList.add(
-    "authenticated"
-  );
-
-  loadSavedExam();
-
 }
 
 
@@ -114,77 +53,53 @@ function openDashboard() {
 ===================================================== */
 
 if ($("loginBtn")) {
-
-  $("loginBtn").onclick =
-    teacherLogin;
-
+  $("loginBtn").onclick = teacherLogin;
 }
-
 
 if ($("username")) {
-
-  $("username").addEventListener(
-    "keydown",
-    (e) => {
-
-      if (e.key === "Enter") {
-        teacherLogin();
-      }
-
+  $("username").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      teacherLogin();
     }
-  );
-
+  });
 }
-
 
 if ($("password")) {
-
-  $("password").addEventListener(
-    "keydown",
-    (e) => {
-
-      if (e.key === "Enter") {
-        teacherLogin();
-      }
-
+  $("password").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      teacherLogin();
     }
-  );
-
+  });
 }
 
-
-function teacherLogin() {
+async function teacherLogin() {
 
   const username =
-    $("username")
-      ?.value
-      .trim() || "";
+    $("username")?.value.trim() || "";
 
   const password =
-    $("password")
-      ?.value || "";
-
+    $("password")?.value || "";
 
   if ($("loginError")) {
     $("loginError").textContent = "";
   }
 
-
   if (!username || !password) {
 
     if ($("loginError")) {
-
       $("loginError").textContent =
         "اكتب اسم المستخدم وكلمة المرور.";
-
     }
 
     return;
   }
 
-
   /*
-    بيانات الدخول الحالية
+    تسجيل الدخول للوحة المدرس.
+
+    البيانات الحالية:
+    Username: Hasan
+    Password: 25808
   */
 
   if (
@@ -193,22 +108,15 @@ function teacherLogin() {
   ) {
 
     if ($("loginError")) {
-
       $("loginError").textContent =
         "اسم المستخدم أو كلمة المرور غير صحيحة.";
-
     }
 
     return;
   }
 
-
-  teacherUsername =
-    username;
-
-  teacherPassword =
-    password;
-
+  teacherUsername = username;
+  teacherPassword = password;
 
   sessionStorage.setItem(
     "hasan_teacher_username",
@@ -220,9 +128,14 @@ function teacherLogin() {
     password
   );
 
+  hide("login");
+  show("app");
 
-  openDashboard();
+  document.body.classList.add(
+    "authenticated"
+  );
 
+  loadSavedExam();
 }
 
 
@@ -244,7 +157,6 @@ window.addEventListener(
         "hasan_teacher_password"
       );
 
-
     if (
       savedUsername === "Hasan" &&
       savedPassword === "25808"
@@ -256,25 +168,33 @@ window.addEventListener(
       teacherPassword =
         savedPassword;
 
-      openDashboard();
+      hide("login");
+      show("app");
 
+      document.body.classList.add(
+        "authenticated"
+      );
+
+      loadSavedExam();
     }
-
 
     renderQuestions();
 
-    hide("createdExam");
-
-    hide("detailsModal");
-
-
-    if ($("downloadPdfBtn")) {
-
-      $("downloadPdfBtn").disabled =
-        true;
-
+    if ($("createdExam")) {
+      hide("createdExam");
     }
 
+    if ($("detailsModal")) {
+      hide("detailsModal");
+    }
+
+    if ($("downloadPdfBtn")) {
+      $("downloadPdfBtn").disabled = true;
+    }
+
+    if ($("deleteExamBtn")) {
+      $("deleteExamBtn").disabled = true;
+    }
   }
 );
 
@@ -285,69 +205,58 @@ window.addEventListener(
 
 if ($("logoutBtn")) {
 
-  $("logoutBtn").onclick =
-    () => {
+  $("logoutBtn").onclick = () => {
 
-      sessionStorage.removeItem(
-        "hasan_teacher_username"
-      );
+    sessionStorage.removeItem(
+      "hasan_teacher_username"
+    );
 
-      sessionStorage.removeItem(
-        "hasan_teacher_password"
-      );
+    sessionStorage.removeItem(
+      "hasan_teacher_password"
+    );
 
-      teacherUsername = "";
-      teacherPassword = "";
+    teacherUsername = "";
+    teacherPassword = "";
 
-      location.reload();
-
-    };
+    location.reload();
+  };
 
 }
 
 
 /* =====================================================
-   ADD QUESTION
+   QUESTIONS
 ===================================================== */
 
 if ($("addQuestionBtn")) {
-
   $("addQuestionBtn").onclick =
     addQuestion;
-
 }
-
 
 function addQuestion() {
 
   questions.push({
-
     text: "",
-
     options: [
       "",
       "",
       "",
       ""
     ],
-
     correct_index: 0
-
   });
-
 
   renderQuestions();
 
-
   setTimeout(() => {
 
-    const items =
+    const elements =
       document.querySelectorAll(
         "[data-question-index]"
       );
 
     const last =
-      items[items.length - 1];
+      elements[elements.length - 1];
 
     if (last) {
 
@@ -359,13 +268,8 @@ function addQuestion() {
     }
 
   }, 100);
-
 }
 
-
-/* =====================================================
-   RENDER QUESTIONS
-===================================================== */
 
 function renderQuestions() {
 
@@ -373,7 +277,6 @@ function renderQuestions() {
     $("questionsContainer");
 
   if (!container) return;
-
 
   if (!questions.length) {
 
@@ -384,17 +287,14 @@ function renderQuestions() {
     `;
 
     return;
-
   }
-
 
   container.innerHTML =
     questions
       .map(
-        (q, qIndex) => {
+        (question, qIndex) => {
 
           return `
-
             <div
               class="questionEditor"
               data-question-index="${qIndex}"
@@ -426,26 +326,22 @@ function renderQuestions() {
                     this.value
                   )
                 "
-              >${esc(q.text)}</textarea>
+              >${esc(question.text)}</textarea>
 
 
               <div class="optionsGrid">
 
-                ${q.options
+                ${question.options
                   .map(
                     (option, optionIndex) => {
 
                       return `
-
-                        <div
-                          class="optionEditor"
-                        >
+                        <div class="optionEditor">
 
                           <label>
                             الاختيار
                             ${optionIndex + 1}
                           </label>
-
 
                           <input
                             type="text"
@@ -460,16 +356,13 @@ function renderQuestions() {
                             "
                           >
 
-
-                          <label
-                            class="correctOption"
-                          >
+                          <label class="correctOption">
 
                             <input
                               type="radio"
                               name="correct-${qIndex}"
                               ${
-                                q.correct_index ===
+                                question.correct_index ===
                                 optionIndex
                                   ? "checked"
                                   : ""
@@ -487,7 +380,6 @@ function renderQuestions() {
                           </label>
 
                         </div>
-
                       `;
 
                     }
@@ -497,18 +389,16 @@ function renderQuestions() {
               </div>
 
             </div>
-
           `;
 
         }
       )
       .join("");
-
 }
 
 
 /* =====================================================
-   QUESTION FUNCTIONS
+   QUESTION ACTIONS
 ===================================================== */
 
 window.updateQuestionText =
@@ -522,7 +412,6 @@ window.updateQuestionText =
 
     questions[index].text =
       value;
-
   };
 
 
@@ -539,7 +428,6 @@ window.updateOption =
     questions[questionIndex]
       .options[optionIndex] =
       value;
-
   };
 
 
@@ -555,7 +443,6 @@ window.updateCorrect =
     questions[questionIndex]
       .correct_index =
       optionIndex;
-
   };
 
 
@@ -570,15 +457,12 @@ window.removeQuestion =
       return;
     }
 
-
     questions.splice(
       index,
       1
     );
 
-
     renderQuestions();
-
   };
 
 
@@ -597,56 +481,57 @@ if ($("createExamBtn")) {
 async function createExam() {
 
   const title =
-    $("examTitleInput")
-      ?.value
-      .trim() || "";
-
+    $("examTitleInput")?.value.trim() ||
+    "";
 
   const duration =
     Number(
-      $("duration")
-        ?.value
+      $("duration")?.value
     );
-
 
   const availabilityDays =
     Number(
-      $("availabilityDays")
-        ?.value
+      $("availabilityDays")?.value
     );
-
 
   const errorBox =
     $("createError");
-
 
   if (errorBox) {
     errorBox.textContent = "";
   }
 
 
+  /* اسم الامتحان */
+
   if (!title) {
 
-    errorBox.textContent =
-      "اكتب اسم الامتحان.";
+    if (errorBox) {
+      errorBox.textContent =
+        "اكتب اسم الامتحان.";
+    }
 
     return;
-
   }
 
+
+  /* مدة الامتحان */
 
   if (
     !Number.isFinite(duration) ||
     duration < 1
   ) {
 
-    errorBox.textContent =
-      "اكتب مدة صحيحة للامتحان.";
+    if (errorBox) {
+      errorBox.textContent =
+        "اكتب مدة صحيحة للامتحان.";
+    }
 
     return;
-
   }
 
+
+  /* مدة إتاحة الامتحان */
 
   if (
     !Number.isFinite(
@@ -655,23 +540,29 @@ async function createExam() {
     availabilityDays < 1
   ) {
 
-    errorBox.textContent =
-      "اكتب مدة إتاحة صحيحة.";
+    if (errorBox) {
+      errorBox.textContent =
+        "اكتب مدة إتاحة صحيحة.";
+    }
 
     return;
-
   }
 
+
+  /* عدد الأسئلة */
 
   if (!questions.length) {
 
-    errorBox.textContent =
-      "أضف سؤالًا واحدًا على الأقل.";
+    if (errorBox) {
+      errorBox.textContent =
+        "أضف سؤالًا واحدًا على الأقل.";
+    }
 
     return;
-
   }
 
+
+  /* التحقق من الأسئلة */
 
   for (
     let i = 0;
@@ -688,11 +579,12 @@ async function createExam() {
       !q.text.trim()
     ) {
 
-      errorBox.textContent =
-        `السؤال رقم ${i + 1} فارغ.`;
+      if (errorBox) {
+        errorBox.textContent =
+          `السؤال رقم ${i + 1} فارغ.`;
+      }
 
       return;
-
     }
 
 
@@ -707,13 +599,28 @@ async function createExam() {
         !q.options[j].trim()
       ) {
 
-        errorBox.textContent =
-          `الاختيار ${j + 1} في السؤال ${i + 1} فارغ.`;
+        if (errorBox) {
+          errorBox.textContent =
+            `الاختيار ${j + 1} في السؤال ${i + 1} فارغ.`;
+        }
 
         return;
-
       }
 
+    }
+
+
+    if (
+      q.correct_index < 0 ||
+      q.correct_index > 3
+    ) {
+
+      if (errorBox) {
+        errorBox.textContent =
+          `حدد الإجابة الصحيحة للسؤال ${i + 1}.`;
+      }
+
+      return;
     }
 
   }
@@ -725,7 +632,6 @@ async function createExam() {
   const oldText =
     button.textContent;
 
-
   button.disabled = true;
 
   button.textContent =
@@ -735,7 +641,6 @@ async function createExam() {
   const cleanQuestions =
     questions.map(
       (q) => ({
-
         text:
           q.text.trim(),
 
@@ -747,7 +652,6 @@ async function createExam() {
 
         correct_index:
           q.correct_index
-
       })
     );
 
@@ -760,7 +664,6 @@ async function createExam() {
     } = await client.rpc(
       "create_public_exam_with_expiry",
       {
-
         p_title:
           title,
 
@@ -778,7 +681,6 @@ async function createExam() {
 
         p_teacher_password:
           teacherPassword
-
       }
     );
 
@@ -790,12 +692,24 @@ async function createExam() {
         error
       );
 
-      errorBox.textContent =
-        error.message ||
-        "حدث خطأ أثناء إنشاء الامتحان.";
+      if (errorBox) {
+        errorBox.textContent =
+          error.message ||
+          "حدث خطأ أثناء إنشاء الامتحان.";
+      }
 
       return;
+    }
 
+
+    if (!data) {
+
+      if (errorBox) {
+        errorBox.textContent =
+          "لم يتم إنشاء الامتحان.";
+      }
+
+      return;
     }
 
 
@@ -807,11 +721,12 @@ async function createExam() {
 
     if (!result) {
 
-      errorBox.textContent =
-        "لم يتم إنشاء الامتحان.";
+      if (errorBox) {
+        errorBox.textContent =
+          "لم يتم استلام بيانات الامتحان.";
+      }
 
       return;
-
     }
 
 
@@ -827,17 +742,20 @@ async function createExam() {
     if (!code) {
 
       console.error(
-        "CREATE RESPONSE:",
+        "CREATE EXAM RESPONSE:",
         data
       );
 
-      errorBox.textContent =
-        "تم إنشاء الامتحان ولكن لم يتم استلام الكود.";
+      if (errorBox) {
+        errorBox.textContent =
+          "تم إنشاء الامتحان ولكن لم يتم استلام الكود.";
+      }
 
       return;
-
     }
 
+
+    /* حفظ الكود */
 
     localStorage.setItem(
       "hasan_last_exam_code",
@@ -845,13 +763,15 @@ async function createExam() {
     );
 
 
-    if ($("createdCode")) {
+    /* عرض الكود */
 
+    if ($("createdCode")) {
       $("createdCode").textContent =
         code;
-
     }
 
+
+    /* إنشاء الرابط */
 
     const basePath =
       location.pathname.replace(
@@ -865,23 +785,24 @@ async function createExam() {
 
 
     if ($("shareLink")) {
-
       $("shareLink").value =
         shareLink;
-
     }
 
+
+    /* تاريخ الانتهاء */
 
     if (
       expiresAt &&
       $("shareExpiry")
     ) {
 
+      const date =
+        new Date(expiresAt);
+
       $("shareExpiry").textContent =
         "ينتهي الامتحان في: " +
-        new Date(
-          expiresAt
-        ).toLocaleString(
+        date.toLocaleString(
           "ar-EG"
         );
 
@@ -891,12 +812,19 @@ async function createExam() {
     show("createdExam");
 
 
-  } catch (error) {
+    if (errorBox) {
+      errorBox.textContent = "";
+    }
 
-    console.error(error);
 
-    errorBox.textContent =
-      "حدث خطأ غير متوقع أثناء إنشاء الامتحان.";
+  } catch (err) {
+
+    console.error(err);
+
+    if (errorBox) {
+      errorBox.textContent =
+        "حدث خطأ غير متوقع أثناء إنشاء الامتحان.";
+    }
 
   } finally {
 
@@ -924,7 +852,6 @@ if ($("copyLinkBtn")) {
 
       if (!input) return;
 
-
       const value =
         input.value.trim();
 
@@ -949,19 +876,15 @@ if ($("copyLinkBtn")) {
 
 
       const oldText =
-        $("copyLinkBtn")
-          .textContent;
+        $("copyLinkBtn").textContent;
 
-
-      $("copyLinkBtn")
-        .textContent =
+      $("copyLinkBtn").textContent =
         "تم النسخ ✅";
 
 
       setTimeout(() => {
 
-        $("copyLinkBtn")
-          .textContent =
+        $("copyLinkBtn").textContent =
           oldText;
 
       }, 1500);
@@ -986,34 +909,26 @@ if ($("newExamBtn")) {
 
 
       if ($("examTitleInput")) {
-
-        $("examTitleInput")
-          .value = "";
-
+        $("examTitleInput").value =
+          "";
       }
 
 
       if ($("duration")) {
-
-        $("duration")
-          .value = "";
-
+        $("duration").value =
+          "";
       }
 
 
       if ($("availabilityDays")) {
-
-        $("availabilityDays")
-          .value = "1";
-
+        $("availabilityDays").value =
+          "1";
       }
 
 
       if ($("createError")) {
-
-        $("createError")
-          .textContent = "";
-
+        $("createError").textContent =
+          "";
       }
 
 
@@ -1045,25 +960,26 @@ if ($("loadResultsBtn")) {
 async function loadResults() {
 
   const code =
-    $("resultsCode")
-      ?.value
-      .trim() || "";
-
+    $("resultsCode")?.value.trim() ||
+    "";
 
   const errorBox =
     $("resultsError");
 
 
-  errorBox.textContent = "";
+  if (errorBox) {
+    errorBox.textContent = "";
+  }
 
 
   if (!code) {
 
-    errorBox.textContent =
-      "اكتب كود الامتحان.";
+    if (errorBox) {
+      errorBox.textContent =
+        "اكتب كود الامتحان.";
+    }
 
     return;
-
   }
 
 
@@ -1072,7 +988,6 @@ async function loadResults() {
 
   const oldText =
     button.textContent;
-
 
   button.disabled = true;
 
@@ -1088,7 +1003,6 @@ async function loadResults() {
     } = await client.rpc(
       "teacher_public_results",
       {
-
         p_code:
           code,
 
@@ -1097,7 +1011,6 @@ async function loadResults() {
 
         p_teacher_password:
           teacherPassword
-
       }
     );
 
@@ -1109,12 +1022,13 @@ async function loadResults() {
         error
       );
 
-      errorBox.textContent =
-        error.message ||
-        "تعذر تحميل النتائج.";
+      if (errorBox) {
+        errorBox.textContent =
+          error.message ||
+          "تعذر تحميل النتائج.";
+      }
 
       return;
-
     }
 
 
@@ -1128,12 +1042,27 @@ async function loadResults() {
       lastResults
     );
 
+    lastResultsCode = code;
 
     if ($("downloadPdfBtn")) {
-
       $("downloadPdfBtn").disabled =
         lastResults.length === 0;
+    }
 
+    if ($("deleteExamBtn")) {
+      $("deleteExamBtn").disabled =
+        !lastResultsCode ||
+        pdfDownloadedForCode !== lastResultsCode;
+    }
+
+
+  } catch (err) {
+
+    console.error(err);
+
+    if (errorBox) {
+      errorBox.textContent =
+        "حدث خطأ أثناء تحميل النتائج.";
     }
 
   } finally {
@@ -1174,7 +1103,6 @@ function renderResults(rows) {
     `;
 
     return;
-
   }
 
 
@@ -1203,7 +1131,6 @@ function renderResults(rows) {
 
 
           return `
-
             <tr>
 
               <td>
@@ -1249,13 +1176,11 @@ function renderResults(rows) {
               </td>
 
             </tr>
-
           `;
 
         }
       )
       .join("");
-
 }
 
 
@@ -1303,7 +1228,6 @@ window.showDetails =
 
 
     content.innerHTML = `
-
       <div class="details">
 
         <h3>
@@ -1314,43 +1238,32 @@ window.showDetails =
           <strong>
             الطالب:
           </strong>
-
           ${esc(
             row.student_name
           )}
         </p>
 
-
         <p>
-
           <strong>
             الدرجة:
           </strong>
-
           ${esc(score)}
           /
           ${esc(total)}
-
         </p>
 
-
         <p>
-
           <strong>
             وقت التسليم:
           </strong>
-
           ${esc(submitted)}
-
         </p>
 
       </div>
-
     `;
 
 
     show("detailsModal");
-
   };
 
 
@@ -1362,11 +1275,7 @@ if ($("closeModalBtn")) {
 
   $("closeModalBtn").onclick =
     () => {
-
-      hide(
-        "detailsModal"
-      );
-
+      hide("detailsModal");
     };
 
 }
@@ -1382,11 +1291,7 @@ if ($("detailsModal")) {
         e.target ===
         $("detailsModal")
       ) {
-
-        hide(
-          "detailsModal"
-        );
-
+        hide("detailsModal");
       }
 
     }
@@ -1396,7 +1301,7 @@ if ($("detailsModal")) {
 
 
 /* =====================================================
-   PDF
+   DOWNLOAD PDF
 ===================================================== */
 
 if ($("downloadPdfBtn")) {
@@ -1410,9 +1315,8 @@ if ($("downloadPdfBtn")) {
 function downloadPDF() {
 
   const code =
-    $("resultsCode")
-      ?.value
-      .trim() || "";
+    $("resultsCode")?.value.trim() ||
+    "";
 
 
   if (!code) {
@@ -1422,7 +1326,6 @@ function downloadPDF() {
     );
 
     return;
-
   }
 
 
@@ -1433,7 +1336,6 @@ function downloadPDF() {
     );
 
     return;
-
   }
 
 
@@ -1447,13 +1349,11 @@ function downloadPDF() {
     );
 
     return;
-
   }
 
 
   const doc =
     new window.jspdf.jsPDF({
-
       orientation:
         "portrait",
 
@@ -1462,7 +1362,6 @@ function downloadPDF() {
 
       format:
         "a4"
-
     });
 
 
@@ -1504,7 +1403,6 @@ function downloadPDF() {
           row.question_count ??
           "-";
 
-
         const submitted =
           row.submitted_at
             ? new Date(
@@ -1516,7 +1414,6 @@ function downloadPDF() {
 
 
         return [
-
           String(index + 1),
 
           String(
@@ -1530,7 +1427,6 @@ function downloadPDF() {
           row.submitted_at
             ? "Submitted"
             : "Not submitted"
-
         ];
 
       }
@@ -1547,7 +1443,6 @@ function downloadPDF() {
     );
 
     return;
-
   }
 
 
@@ -1557,37 +1452,27 @@ function downloadPDF() {
       34,
 
     head: [[
-
       "#",
-
       "Student",
-
       "Score",
-
       "Submitted",
-
       "Status"
-
     ]],
 
     body:
       rows,
 
     styles: {
-
       fontSize:
         9,
 
       cellPadding:
         3
-
     },
 
     headStyles: {
-
       fontStyle:
         "bold"
-
     }
 
   });
@@ -1597,11 +1482,121 @@ function downloadPDF() {
     `hasan-exam-results-${code}.pdf`
   );
 
+  // السماح بالحذف بعد تنفيذ تنزيل الـPDF
+  pdfDownloadedForCode = code;
+
+  if ($("deleteExamBtn")) {
+    $("deleteExamBtn").disabled =
+      lastResultsCode !== code;
+  }
 }
 
 
 /* =====================================================
-   SAVED EXAM
+   DELETE EXAM + RESULTS
+===================================================== */
+
+if ($("deleteExamBtn")) {
+  $("deleteExamBtn").onclick = deleteExam;
+}
+
+async function deleteExam() {
+  const code =
+    lastResultsCode ||
+    $("resultsCode")?.value.trim() ||
+    "";
+
+  const errorBox = $("resultsError");
+
+  if (!code) {
+    if (errorBox) errorBox.textContent = "اكتب كود الامتحان أولًا.";
+    return;
+  }
+
+  if (pdfDownloadedForCode !== code) {
+    if (errorBox) {
+      errorBox.textContent =
+        "يجب تنزيل النتائج PDF أولًا قبل حذف الامتحان.";
+    }
+    return;
+  }
+
+  if (!confirm(
+    `تحذير ⚠️\n\nسيتم حذف الامتحان (${code}) وجميع نتائجه وإجابات الطلاب نهائيًا.\n\nتأكد أنك احتفظت بملف PDF.\n\nهل تريد المتابعة؟`
+  )) return;
+
+  const typedCode = prompt(
+    `للتأكيد النهائي، اكتب كود الامتحان:\n${code}`
+  );
+
+  if (typedCode === null) return;
+
+  if (typedCode.trim().toUpperCase() !== code.toUpperCase()) {
+    alert("كود الامتحان غير مطابق. لم يتم حذف أي شيء.");
+    return;
+  }
+
+  const button = $("deleteExamBtn");
+  const oldText = button?.textContent || "🗑️ حذف الامتحان ونتائجه";
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "جاري حذف الامتحان...";
+  }
+
+  if (errorBox) errorBox.textContent = "";
+
+  try {
+    const { data, error } = await client.rpc(
+      "delete_public_exam",
+      {
+        p_code: code,
+        p_teacher_username: teacherUsername,
+        p_teacher_password: teacherPassword
+      }
+    );
+
+    if (error) {
+      console.error("DELETE EXAM ERROR:", error);
+      throw new Error(error.message || "تعذر حذف الامتحان.");
+    }
+
+    if (!data || data.success !== true) {
+      throw new Error("لم يتم حذف الامتحان.");
+    }
+
+    lastResults = [];
+    lastResultsCode = "";
+    pdfDownloadedForCode = "";
+    renderResults([]);
+
+    if ($("resultsCode")) $("resultsCode").value = "";
+    if ($("downloadPdfBtn")) $("downloadPdfBtn").disabled = true;
+    if ($("deleteExamBtn")) $("deleteExamBtn").disabled = true;
+
+    if (localStorage.getItem("hasan_last_exam_code") === code) {
+      localStorage.removeItem("hasan_last_exam_code");
+    }
+
+    hide("createdExam");
+    alert("تم حذف الامتحان وجميع نتائجه بنجاح ✅");
+
+  } catch (err) {
+    console.error(err);
+    if (errorBox) {
+      errorBox.textContent =
+        err.message || "حدث خطأ أثناء حذف الامتحان.";
+    }
+    if (button) {
+      button.disabled = false;
+      button.textContent = oldText;
+    }
+  }
+}
+
+
+/* =====================================================
+   LAST EXAM
 ===================================================== */
 
 function loadSavedExam() {
