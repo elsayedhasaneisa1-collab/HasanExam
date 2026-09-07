@@ -1,475 +1,1753 @@
-const SUPABASE_URL = "https://zvvfjmadziyuwutdresz.supabase.co";
-const SUPABASE_KEY = "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc";
+const SUPABASE_URL =
+    "https://zvvfjmadziyuwutdresz.supabase.co";
 
-const $ = id => document.getElementById(id);
+const SUPABASE_KEY =
+    "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc";
+
+
+const $ =
+    id => document.getElementById(id);
+
+
 let rows = [];
-let questionNumber = 0;
-let authenticated = false;
 
-async function rpc(fn, body = {}) {
-  const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`
-    },
-    body: JSON.stringify(body)
-  });
+let q = 0;
 
-  const text = await r.text();
-  if (!r.ok) throw new Error(text || "حدث خطأ في الاتصال بالخادم.");
-  return text ? JSON.parse(text) : null;
+
+/*
+ * Credentials stay only in memory.
+ * They are NOT stored in localStorage/sessionStorage.
+ */
+let teacherUsername = "";
+
+let teacherPassword = "";
+
+
+/* ============================================================
+   RPC
+============================================================ */
+
+async function rpc(
+    functionName,
+    body = {}
+) {
+
+    const response =
+        await fetch(
+            `${SUPABASE_URL}/rest/v1/rpc/${functionName}`,
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "application/json",
+
+                    "apikey":
+                        SUPABASE_KEY,
+
+                    "Authorization":
+                        "Bearer " +
+                        SUPABASE_KEY
+                },
+
+                body:
+                    JSON.stringify(body)
+            }
+        );
+
+
+    const text =
+        await response.text();
+
+
+    if (!response.ok) {
+
+        let message =
+            text ||
+            "حدث خطأ في الخادم.";
+
+
+        try {
+
+            const json =
+                JSON.parse(text);
+
+
+            message =
+                json.message ||
+                json.error_description ||
+                json.error ||
+                message;
+
+        } catch (_) {}
+
+
+        throw new Error(
+            message
+        );
+    }
+
+
+    if (!text) {
+        return null;
+    }
+
+
+    return JSON.parse(text);
 }
 
-const esc = value => String(value ?? "").replace(/[&<>"']/g, ch => ({
-  "&": "&amp;",
-  "<": "&lt;",
-  ">": "&gt;",
-  '"': "&quot;",
-  "'": "&#039;"
-}[ch]));
 
-function normalizeResult(x) {
-  const r = x || {};
-  return {
-    name: String(r.student_name ?? r.name ?? r.student ?? "اسم الطالب غير متاح"),
-    exam: String(r.exam_title ?? r.title ?? r.exam ?? "امتحان"),
-    score: Number(r.score ?? r.correct ?? r.correct_answers ?? 0),
-    total: Number(r.total_questions ?? r.total ?? r.questions_count ?? 0)
-  };
+/* ============================================================
+   ESCAPE
+============================================================ */
+
+function esc(value) {
+
+    return String(
+        value ?? ""
+    )
+        .replace(
+            /[&<>"']/g,
+            character =>
+                ({
+                    "&":
+                        "&amp;",
+
+                    "<":
+                        "&lt;",
+
+                    ">":
+                        "&gt;",
+
+                    '"':
+                        "&quot;",
+
+                    "'":
+                        "&#039;"
+                }[character])
+        );
 }
 
-function percentage(x) {
-  const n = normalizeResult(x);
-  return n.total > 0
-    ? Math.max(0, Math.min(100, Math.round((n.score / n.total) * 100)))
-    : 0;
+
+/* ============================================================
+   NORMALIZE RESULT
+============================================================ */
+
+function normalizeResult(
+    value
+) {
+
+    const result =
+        value || {};
+
+
+    return {
+
+        name:
+            String(
+                result.student_name ??
+                result.name ??
+                result.student ??
+                "اسم الطالب غير متاح"
+            ),
+
+
+        exam:
+            String(
+                result.exam_title ??
+                result.title ??
+                result.exam ??
+                "امتحان"
+            ),
+
+
+        score:
+            Number(
+                result.score ??
+                result.correct ??
+                0
+            ),
+
+
+        total:
+            Number(
+                result.total_questions ??
+                result.total ??
+                0
+            )
+    };
 }
+
+
+/* ============================================================
+   PERCENTAGE
+============================================================ */
+
+function percentage(
+    value
+) {
+
+    const result =
+        normalizeResult(
+            value
+        );
+
+
+    if (
+        result.total <= 0
+    ) {
+
+        return 0;
+    }
+
+
+    return Math.max(
+        0,
+        Math.min(
+            100,
+            Math.round(
+                result.score /
+                result.total *
+                100
+            )
+        )
+    );
+}
+
+
+/* ============================================================
+   MENU
+============================================================ */
 
 function openMenu() {
-  if (!authenticated) return;
-  $("menu").classList.add("open");
-  $("overlay").classList.add("open");
+
+    $("menu")
+        .classList
+        .add("open");
+
+
+    $("overlay")
+        .classList
+        .add("open");
 }
+
 
 function closeMenu() {
-  $("menu").classList.remove("open");
-  $("overlay").classList.remove("open");
+
+    $("menu")
+        .classList
+        .remove("open");
+
+
+    $("overlay")
+        .classList
+        .remove("open");
 }
 
-function showPage(id) {
-  if (!authenticated) return;
-  document.querySelectorAll(".page").forEach(page => page.classList.add("hidden"));
-  const target = $(id);
-  if (target) target.classList.remove("hidden");
 
-  document.querySelectorAll(".nav").forEach(nav => {
-    nav.classList.toggle("active", nav.dataset.page === id);
-  });
+$("hamb").onclick =
+    openMenu;
 
-  closeMenu();
-  if (id === "results") renderResults();
+
+$("close").onclick =
+    closeMenu;
+
+
+$("overlay").onclick =
+    closeMenu;
+
+
+/* ============================================================
+   PAGES
+============================================================ */
+
+function showPage(
+    pageId
+) {
+
+    document
+        .querySelectorAll(".page")
+        .forEach(
+            element =>
+                element
+                    .classList
+                    .add("hidden")
+        );
+
+
+    const target =
+        $(pageId);
+
+
+    if (target) {
+
+        target
+            .classList
+            .remove("hidden");
+    }
+
+
+    document
+        .querySelectorAll(".nav")
+        .forEach(
+            button =>
+                button
+                    .classList
+                    .toggle(
+                        "active",
+                        button.dataset.page ===
+                            pageId
+                    )
+        );
+
+
+    closeMenu();
+
+
+    if (
+        pageId ===
+        "results"
+    ) {
+
+        loadResults();
+    }
 }
 
-function resultCard(raw) {
-  const n = normalizeResult(raw);
-  const p = percentage(raw);
-  const wrong = Math.max(0, n.total - n.score);
-  const initial = n.name.trim().charAt(0) || "ط";
 
-  return `
-    <div class="result" data-index="${rows.indexOf(raw)}">
-      <div class="result-avatar">${esc(initial)}</div>
-      <div>
-        <div class="name">${esc(n.name)}</div>
-        <div class="exam">${esc(n.exam)}</div>
-      </div>
-      <div class="rstat"><b>${n.score} / ${n.total}</b>إجابات صحيحة</div>
-      <div class="rstat"><b>${wrong}</b>إجابات خاطئة</div>
-      <div class="rpercent">${p}%</div>
-    </div>`;
+document
+    .querySelectorAll(".nav")
+    .forEach(
+        button => {
+
+            button.onclick =
+                () =>
+                    showPage(
+                        button.dataset.page
+                    );
+        }
+    );
+
+
+document
+    .querySelectorAll("[data-go]")
+    .forEach(
+        button => {
+
+            button.onclick =
+                () =>
+                    showPage(
+                        button.dataset.go
+                    );
+        }
+    );
+
+
+/* ============================================================
+   LOGIN
+============================================================ */
+
+$("loginForm")
+    .onsubmit =
+        async event => {
+
+            event.preventDefault();
+
+
+            const username =
+                $("user")
+                    .value
+                    .trim();
+
+
+            const password =
+                $("pass")
+                    .value;
+
+
+            $("err")
+                .textContent = "";
+
+
+            if (
+                !username ||
+                !password
+            ) {
+
+                $("err")
+                    .textContent =
+                        "اكتب اسم المستخدم وكلمة المرور.";
+
+                return;
+            }
+
+
+            /*
+             * Frontend check
+             */
+
+            if (
+                username !==
+                    "Hasan" ||
+                password !==
+                    "25808"
+            ) {
+
+                $("err")
+                    .textContent =
+                        "بيانات الدخول غير صحيحة.";
+
+                return;
+            }
+
+
+            /*
+             * Keep credentials only in memory.
+             */
+
+            teacherUsername =
+                username;
+
+            teacherPassword =
+                password;
+
+
+            startTeacherPanel();
+        };
+
+
+/* ============================================================
+   LOGOUT
+============================================================ */
+
+$("logout")
+    .onclick =
+        () => {
+
+            teacherUsername = "";
+
+            teacherPassword = "";
+
+            rows = [];
+
+            localStorage.removeItem(
+                "hasan_last_exam_code"
+            );
+
+            location.reload();
+        };
+
+
+/* ============================================================
+   REFRESH
+============================================================ */
+
+$("refresh")
+    .onclick =
+        loadResults;
+
+
+$("refreshTop")
+    .onclick =
+        loadResults;
+
+
+$("search")
+    .oninput =
+        renderResults;
+
+
+$("order")
+    .onchange =
+        renderResults;
+
+
+/* ============================================================
+   RESULT CARD
+============================================================ */
+
+function resultCard(
+    raw
+) {
+
+    const result =
+        normalizeResult(
+            raw
+        );
+
+
+    const percent =
+        percentage(
+            raw
+        );
+
+
+    const wrong =
+        Math.max(
+            0,
+            result.total -
+            result.score
+        );
+
+
+    const initial =
+        result.name
+            .trim()
+            .charAt(0) ||
+        "ط";
+
+
+    return `
+        <div
+            class="result"
+            data-index="${rows.indexOf(raw)}"
+        >
+
+            <div class="result-avatar">
+                ${esc(initial)}
+            </div>
+
+
+            <div>
+
+                <div class="name">
+                    ${esc(result.name)}
+                </div>
+
+                <div class="exam">
+                    ${esc(result.exam)}
+                </div>
+
+            </div>
+
+
+            <div class="rstat">
+
+                <b>
+                    ${result.score} / ${result.total}
+                </b>
+
+                إجابات صحيحة
+
+            </div>
+
+
+            <div class="rstat">
+
+                <b>
+                    ${wrong}
+                </b>
+
+                إجابات خاطئة
+
+            </div>
+
+
+            <div class="rpercent">
+                ${percent}%
+            </div>
+
+        </div>
+    `;
 }
 
-function topCard(raw, index) {
-  const n = normalizeResult(raw);
-  const p = percentage(raw);
 
-  return `
-    <article class="student">
-      <div class="rank ${index === 0 ? "one" : ""}">${index + 1}</div>
-      <div class="name">${esc(n.name)}</div>
-      <div class="exam">${esc(n.exam)}</div>
-      <div class="meter"><i style="width:${p}%"></i></div>
-      <div class="scoreline"><span>${n.score} من ${n.total}</span><b>${p}%</b></div>
-    </article>`;
+/* ============================================================
+   TOP STUDENT CARD
+============================================================ */
+
+function topCard(
+    raw,
+    index
+) {
+
+    const result =
+        normalizeResult(
+            raw
+        );
+
+
+    const percent =
+        percentage(
+            raw
+        );
+
+
+    return `
+        <article class="student">
+
+            <div
+                class="rank ${
+                    index === 0
+                        ? "one"
+                        : ""
+                }"
+            >
+                ${index + 1}
+            </div>
+
+
+            <div class="name">
+                ${esc(result.name)}
+            </div>
+
+
+            <div class="exam">
+                ${esc(result.exam)}
+            </div>
+
+
+            <div class="meter">
+
+                <i
+                    style="width:${percent}%"
+                ></i>
+
+            </div>
+
+
+            <div class="scoreline">
+
+                <span>
+                    ${result.score} من ${result.total}
+                </span>
+
+                <b>
+                    ${percent}%
+                </b>
+
+            </div>
+
+        </article>
+    `;
 }
+
+
+/* ============================================================
+   RENDER RESULTS
+============================================================ */
 
 function renderResults() {
-  const search = $("search");
-  const order = $("order");
-  if (!search || !order || !$("resultsList")) return;
 
-  const term = search.value.trim().toLowerCase();
-  const filtered = rows.filter(raw =>
-    normalizeResult(raw).name.toLowerCase().includes(term)
-  );
+    const search =
+        $("search")
+            .value
+            .trim()
+            .toLowerCase();
 
-  filtered.sort((a, b) => {
-    return order.value === "desc"
-      ? percentage(b) - percentage(a)
-      : percentage(a) - percentage(b);
-  });
 
-  $("resultsList").innerHTML = filtered.length
-    ? filtered.map(resultCard).join("")
-    : `<div class="student">لا توجد نتائج مطابقة.</div>`;
+    let filtered =
+        rows.filter(
+            item =>
+                normalizeResult(
+                    item
+                )
+                .name
+                .toLowerCase()
+                .includes(search)
+        );
 
-  document.querySelectorAll(".result").forEach(card => {
-    card.onclick = () => showDetails(rows[Number(card.dataset.index)]);
-  });
+
+    filtered.sort(
+        (a, b) =>
+            $("order").value === "desc"
+                ? percentage(b) -
+                  percentage(a)
+
+                : percentage(a) -
+                  percentage(b)
+    );
+
+
+    $("resultsList")
+        .innerHTML =
+            filtered.length
+
+                ? filtered
+                    .map(
+                        resultCard
+                    )
+                    .join("")
+
+                : `
+                    <div class="student">
+                        لا توجد نتائج مطابقة.
+                    </div>
+                `;
+
+
+    document
+        .querySelectorAll(
+            ".result"
+        )
+        .forEach(
+            element => {
+
+                element.onclick =
+                    () => {
+
+                        const index =
+                            Number(
+                                element.dataset.index
+                            );
+
+
+                        showDetails(
+                            rows[index]
+                        );
+                    };
+            }
+        );
 }
 
-function showDetails(raw) {
-  const n = normalizeResult(raw);
-  const p = percentage(raw);
-  const wrong = Math.max(0, n.total - n.score);
 
-  $("modalName").textContent = n.name;
-  $("modalBody").innerHTML = `
-    <div class="modal-stat">
-      <div><small>الامتحان</small><b>${esc(n.exam)}</b></div>
-      <div><small>النسبة</small><b>${p}%</b></div>
-      <div><small>الإجابات الصحيحة</small><b>${n.score}</b></div>
-      <div><small>الإجابات الخاطئة</small><b>${wrong}</b></div>
-      <div><small>الدرجة</small><b>${n.score} / ${n.total}</b></div>
-      <div><small>التقييم</small><b>${p >= 90 ? "ممتاز 🏆" : p >= 75 ? "جيد جدًا ⭐" : p >= 50 ? "جيد 👍" : "يحتاج مراجعة 📚"}</b></div>
-    </div>`;
+/* ============================================================
+   DETAILS
+============================================================ */
 
-  $("detailsModal").classList.remove("hidden");
+function showDetails(
+    raw
+) {
+
+    const result =
+        normalizeResult(
+            raw
+        );
+
+
+    const percent =
+        percentage(
+            raw
+        );
+
+
+    const wrong =
+        Math.max(
+            0,
+            result.total -
+            result.score
+        );
+
+
+    $("modalName")
+        .textContent =
+            result.name;
+
+
+    $("modalBody")
+        .innerHTML =
+            `
+
+            <div class="modal-stat">
+
+                <div>
+
+                    <small>
+                        الامتحان
+                    </small>
+
+                    <b>
+                        ${esc(result.exam)}
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        النسبة
+                    </small>
+
+                    <b>
+                        ${percent}%
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        الإجابات الصحيحة
+                    </small>
+
+                    <b>
+                        ${result.score}
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        الإجابات الخاطئة
+                    </small>
+
+                    <b>
+                        ${wrong}
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        الدرجة
+                    </small>
+
+                    <b>
+                        ${result.score} /
+                        ${result.total}
+                    </b>
+
+                </div>
+
+
+                <div>
+
+                    <small>
+                        التقييم
+                    </small>
+
+                    <b>
+
+                        ${
+                            percent >= 90
+                                ? "ممتاز 🏆"
+
+                                : percent >= 75
+                                    ? "جيد جدًا ⭐"
+
+                                    : percent >= 50
+                                        ? "جيد 👍"
+
+                                        : "يحتاج مراجعة 📚"
+                        }
+
+                    </b>
+
+                </div>
+
+            </div>
+
+            `;
 }
 
-function renumberQuestions() {
-  document.querySelectorAll("#questions .question").forEach((box, index) => {
-    const title = box.querySelector(".qbar b");
-    if (title) title.textContent = `السؤال ${index + 1}`;
-  });
-  questionNumber = document.querySelectorAll("#questions .question").length;
-}
 
-function addQuestion() {
-  if (!authenticated) return;
-  const questions = $("questions");
-  if (!questions) return;
+$("modalClose")
+    .onclick =
+        () =>
+            $("detailsModal")
+                .classList
+                .add("hidden");
 
-  questionNumber = document.querySelectorAll("#questions .question").length + 1;
 
-  const box = document.createElement("div");
-  box.className = "question";
-  box.innerHTML = `
-    <div class="qbar">
-      <b>السؤال ${questionNumber}</b>
-      <button type="button" class="remove">حذف</button>
-    </div>
-    <label>نص السؤال</label>
-    <input class="qt" type="text" placeholder="اكتب السؤال هنا" autocomplete="off">
-    <label>الاختيارات — اختر الإجابة الصحيحة</label>
-    <div class="opts">
-      ${[0, 1, 2, 3].map(i => `
-        <div class="opt">
-          <input type="radio" name="question_${questionNumber}" value="${i}" ${i === 0 ? "checked" : ""} aria-label="الإجابة الصحيحة">
-          <input class="qo" type="text" placeholder="الاختيار ${i + 1}" autocomplete="off">
-        </div>`).join("")}
-    </div>`;
+$("detailsModal")
+    .onclick =
+        event => {
 
-  box.querySelector(".remove").onclick = () => {
-    box.remove();
-    renumberQuestions();
-  };
+            if (
+                event.target.id ===
+                "detailsModal"
+            ) {
 
-  questions.appendChild(box);
-  box.querySelector(".qt")?.focus();
-}
-
-function createExam() {
-  if (!authenticated) return;
-  return (async () => {
-    try {
-      const title = $("examTitle").value.trim() || "امتحان اللغة العربية";
-      const duration = Number($("duration").value);
-      const questionBoxes = [...document.querySelectorAll("#questions .question")];
-
-      if (!duration || duration < 1) {
-        throw new Error("اكتب مدة صحيحة للامتحان.");
-      }
-
-      if (!questionBoxes.length) {
-        throw new Error("أضف سؤالًا واحدًا على الأقل.");
-      }
-
-      const questions = questionBoxes.map((box, index) => {
-        const selected = box.querySelector("input[type=radio]:checked");
-        const text = box.querySelector(".qt")?.value.trim() || "";
-        const options = [...box.querySelectorAll(".qo")].map(input => input.value.trim());
-
-        if (!text) throw new Error(`اكتب نص السؤال رقم ${index + 1}.`);
-        if (options.some(option => !option)) throw new Error(`أكمل الاختيارات في السؤال رقم ${index + 1}.`);
-        if (!selected) throw new Error(`اختر الإجابة الصحيحة للسؤال رقم ${index + 1}.`);
-
-        return {
-          text,
-          options,
-          correct_index: Number(selected.value)
+                $("detailsModal")
+                    .classList
+                    .add("hidden");
+            }
         };
-      });
 
-      const button = $("createExam");
-      button.disabled = true;
-      button.textContent = "جاري إنشاء الامتحان...";
 
-      const response = await rpc("create_public_exam", {
-        p_title: title,
-        p_duration_minutes: duration,
-        p_questions: questions
-      });
+/* ============================================================
+   PDF
+============================================================ */
 
-      const data = Array.isArray(response) ? response[0] : response;
-      const code = data?.code;
+$("downloadPdf")
+    .onclick =
+        () => {
 
-      if (!code) throw new Error("لم يتم إنشاء الامتحان.");
+            if (
+                rows.length === 0
+            ) {
 
-      $("examLink").value = `${location.origin}${location.pathname.replace(/teacher\.html$/i, "index.html")}?exam=${encodeURIComponent(code)}`;
-      $("share").classList.remove("hidden");
-    } catch (error) {
-      alert(error?.message || "حدث خطأ أثناء إنشاء الامتحان.");
-    } finally {
-      const button = $("createExam");
-      if (button) {
-        button.disabled = false;
-        button.textContent = "إنشاء الامتحان";
-      }
-    }
-  })();
-}
+                alert(
+                    "لا توجد نتائج لتنزيلها."
+                );
 
-function canvasText(ctx, text, x, y, size, weight = "400") {
-  ctx.font = `${weight} ${size}px Arial, Tahoma, sans-serif`;
-  ctx.direction = "rtl";
-  ctx.textAlign = "right";
-  ctx.fillText(String(text ?? ""), x, y);
-}
+                return;
+            }
 
-function drawPdfPage(pageRows, pageNumber, totalPages) {
-  const width = 1684;
-  const height = 1190;
-  const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext("2d");
 
-  ctx.fillStyle = "#ffffff";
-  ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = "#101828";
+            const jsPDF =
+                window.jspdf?.jsPDF;
 
-  canvasText(ctx, "نتائج الطلاب — أستاذ حسن عيسى", width - 70, 80, 38, "700");
-  canvasText(ctx, `تاريخ التقرير: ${new Date().toLocaleString("ar-EG")}`, width - 70, 120, 20, "400");
-  canvasText(ctx, `صفحة ${pageNumber} من ${totalPages}`, 70, 120, 18, "400");
 
-  const right = width - 70;
-  const left = 70;
-  const top = 175;
-  const rowHeight = 58;
+            if (!jsPDF) {
 
-  // RTL columns: الاسم | الامتحان | الدرجة | الخطأ | النسبة | الرقم
-  const columns = [
-    { title: "الطالب", x: 1510, w: 370 },
-    { title: "الامتحان", x: 1120, w: 370 },
-    { title: "الدرجة", x: 800, w: 300 },
-    { title: "الخطأ", x: 550, w: 230 },
-    { title: "النسبة", x: 310, w: 210 },
-    { title: "#", x: 110, w: 140 }
-  ];
+                alert(
+                    "أداة PDF لم يتم تحميلها بعد."
+                );
 
-  ctx.fillStyle = "#eaf2ff";
-  ctx.fillRect(left, top, right - left, rowHeight);
-  ctx.strokeStyle = "#b9c7d8";
-  ctx.lineWidth = 1;
-  ctx.strokeRect(left, top, right - left, rowHeight);
+                return;
+            }
 
-  ctx.fillStyle = "#102a43";
-  columns.forEach(col => canvasText(ctx, col.title, col.x, top + 38, 20, "700"));
 
-  pageRows.forEach((raw, index) => {
-    const n = normalizeResult(raw);
-    const p = percentage(raw);
-    const wrong = Math.max(0, n.total - n.score);
-    const y = top + rowHeight + index * rowHeight;
+            const doc =
+                new jsPDF({
+                    orientation:
+                        "landscape",
 
-    ctx.fillStyle = index % 2 === 0 ? "#ffffff" : "#f7f9fc";
-    ctx.fillRect(left, y, right - left, rowHeight);
-    ctx.strokeStyle = "#d5dde7";
-    ctx.strokeRect(left, y, right - left, rowHeight);
-    ctx.fillStyle = "#172033";
+                    unit:
+                        "pt",
 
-    canvasText(ctx, n.name, 1510, y + 38, 18);
-    canvasText(ctx, n.exam, 1120, y + 38, 18);
-    canvasText(ctx, `${n.score} / ${n.total}`, 800, y + 38, 18);
-    canvasText(ctx, wrong, 550, y + 38, 18);
-    canvasText(ctx, `${p}%`, 310, y + 38, 18, "700");
-    canvasText(ctx, index + 1, 110, y + 38, 18);
-  });
+                    format:
+                        "a4"
+                });
 
-  return canvas;
-}
 
-function downloadPdf() {
-  if (!authenticated) return;
-  if (!rows.length) {
-    alert("لا توجد نتائج لتنزيلها.");
-    return;
-  }
+            doc.setFontSize(
+                20
+            );
 
-  const jsPDF = window.jspdf?.jsPDF;
-  if (!jsPDF) {
-    alert("أداة PDF لم يتم تحميلها بعد. حاول مرة أخرى.");
-    return;
-  }
 
-  const sorted = rows.slice().sort((a, b) => percentage(b) - percentage(a));
-  const perPage = 14;
-  const totalPages = Math.ceil(sorted.length / perPage);
-  const doc = new jsPDF({ orientation: "landscape", unit: "pt", format: "a4" });
+            doc.text(
+                "Hasan Eissa - Student Results",
+                40,
+                45
+            );
 
-  for (let page = 0; page < totalPages; page++) {
-    if (page > 0) doc.addPage();
 
-    const pageRows = sorted.slice(page * perPage, (page + 1) * perPage);
-    const canvas = drawPdfPage(pageRows, page + 1, totalPages);
-    const image = canvas.toDataURL("image/jpeg", 0.92);
-    doc.addImage(image, "JPEG", 0, 0, 841.89, 595.28, undefined, "FAST");
-  }
+            doc.setFontSize(
+                10
+            );
 
-  doc.save("Hasan-Eissa-Results.pdf");
-}
+
+            doc.text(
+                new Date()
+                    .toLocaleString(
+                        "en-GB"
+                    ),
+                40,
+                63
+            );
+
+
+            const data =
+                rows
+                    .slice()
+                    .sort(
+                        (a, b) =>
+                            percentage(b) -
+                            percentage(a)
+                    )
+                    .map(
+                        (item, index) => {
+
+                            const result =
+                                normalizeResult(
+                                    item
+                                );
+
+
+                            return [
+                                index + 1,
+
+                                result.name,
+
+                                result.exam,
+
+                                `${result.score}/${result.total}`,
+
+                                Math.max(
+                                    0,
+                                    result.total -
+                                    result.score
+                                ),
+
+                                `${percentage(item)}%`
+                            ];
+                        }
+                    );
+
+
+            if (
+                typeof doc.autoTable !==
+                "function"
+            ) {
+
+                alert(
+                    "إضافة PDF غير جاهزة. أعد تحميل الصفحة."
+                );
+
+                return;
+            }
+
+
+            doc.autoTable({
+
+                startY: 80,
+
+                head: [[
+                    "#",
+                    "Student",
+                    "Exam",
+                    "Score",
+                    "Wrong",
+                    "Percentage"
+                ]],
+
+                body: data,
+
+                theme:
+                    "grid",
+
+                styles: {
+                    fontSize: 9,
+                    cellPadding: 6
+                },
+
+                headStyles: {
+                    fillColor: [
+                        22,
+                        70,
+                        110
+                    ],
+
+                    textColor:
+                        255
+                }
+
+            });
+
+
+            doc.save(
+                "Hasan-Eissa-Results.pdf"
+            );
+        };
+
+
+/* ============================================================
+   LOAD RESULTS
+============================================================ */
 
 async function loadResults() {
-  if (!authenticated) return;
-  try {
-    const response = await rpc("teacher_public_results");
-    rows = Array.isArray(response) ? response : [];
 
-    const percentages = rows.map(percentage);
-    const avg = percentages.length
-      ? Math.round(percentages.reduce((sum, value) => sum + value, 0) / percentages.length)
-      : 0;
-    const best = percentages.length ? Math.max(...percentages) : 0;
-    const bestIndex = percentages.findIndex(value => value === best);
+    if (
+        !teacherUsername ||
+        !teacherPassword
+    ) {
 
-    $("total").textContent = rows.length;
-    $("count").textContent = rows.length;
-    $("avg").textContent = `${avg}%`;
-    $("high").textContent = `${best}%`;
-    $("highName").textContent = bestIndex >= 0 ? normalizeResult(rows[bestIndex]).name : "—";
-
-    const sorted = rows.slice().sort((a, b) => percentage(b) - percentage(a));
-    $("topStudents").innerHTML = sorted.slice(0, 3).map(topCard).join("") ||
-      `<div class="student">لا توجد نتائج حتى الآن.</div>`;
-
-    renderResults();
-  } catch (error) {
-    console.error(error);
-    $("topStudents").innerHTML = `<div class="student">تعذر تحميل النتائج من الخادم.</div>`;
-  }
-}
-
-function authenticate(event) {
-  event.preventDefault();
-
-  const user = $("user").value.trim();
-  const pass = $("pass").value;
-  const error = $("err");
-
-  // لا يتم فتح لوحة التحكم إلا بعد التحقق من البيانات.
-  if (user !== "Hasan" || pass !== "25808") {
-    error.textContent = "اسم المستخدم أو كلمة المرور غير صحيحة.";
-    $("pass").value = "";
-    $("pass").focus();
-    return;
-  }
-
-  error.textContent = "";
-  authenticated = true;
-  document.body.classList.add("authenticated");
-  $("login").classList.add("hidden");
-  $("login").setAttribute("aria-hidden", "true");
-  $("app").classList.remove("hidden");
-  $("app").setAttribute("aria-hidden", "false");
-  $("app").removeAttribute("inert");
-  loadResults();
-}
-
-function logout() {
-  // لا نحفظ جلسة المدرس في sessionStorage/localStorage.
-  // عند إعادة فتح الصفحة سيطلب كلمة المرور مرة أخرى.
-  authenticated = false;
-  document.body.classList.remove("authenticated");
-  $("app").classList.add("hidden");
-  $("app").setAttribute("aria-hidden", "true");
-  $("app").setAttribute("inert", "");
-  $("login").classList.remove("hidden");
-  $("login").setAttribute("aria-hidden", "false");
-  $("user").value = "";
-  $("pass").value = "";
-  $("err").textContent = "";
-  closeMenu();
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  // حماية إضافية: لا توجد جلسة محفوظة تفتح اللوحة تلقائيًا.
-  authenticated = false;
-  document.body.classList.remove("authenticated");
-  $("app").classList.add("hidden");
-  $("app").setAttribute("aria-hidden", "true");
-  $("app").setAttribute("inert", "");
-  $("login").classList.remove("hidden");
-  $("login").setAttribute("aria-hidden", "false");
-
-  $("loginForm").addEventListener("submit", authenticate);
-  $("logout").addEventListener("click", logout);
-  $("hamb").addEventListener("click", openMenu);
-  $("close").addEventListener("click", closeMenu);
-  $("overlay").addEventListener("click", closeMenu);
-  $("refresh").addEventListener("click", loadResults);
-  $("refreshTop").addEventListener("click", loadResults);
-  $("search").addEventListener("input", renderResults);
-  $("order").addEventListener("change", renderResults);
-  $("addQ").addEventListener("click", addQuestion);
-  $("createExam").addEventListener("click", createExam);
-  $("downloadPdf").addEventListener("click", downloadPdf);
-
-  $("copy").addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText($("examLink").value);
-      $("copy").textContent = "تم ✓";
-      setTimeout(() => $("copy").textContent = "نسخ", 1200);
-    } catch {
-      $("examLink").select();
-      document.execCommand("copy");
-      $("copy").textContent = "تم ✓";
-      setTimeout(() => $("copy").textContent = "نسخ", 1200);
+        return;
     }
-  });
 
-  $("modalClose").addEventListener("click", () => $("detailsModal").classList.add("hidden"));
-  $("detailsModal").addEventListener("click", event => {
-    if (event.target.id === "detailsModal") $("detailsModal").classList.add("hidden");
-  });
 
-  document.querySelectorAll(".nav").forEach(nav => {
-    nav.addEventListener("click", () => showPage(nav.dataset.page));
-  });
+    try {
 
-  document.querySelectorAll("[data-go]").forEach(button => {
-    button.addEventListener("click", () => showPage(button.dataset.go));
-  });
-});
+        const code =
+            localStorage.getItem(
+                "hasan_last_exam_code"
+            );
+
+
+        const data =
+            await rpc(
+                "teacher_public_results",
+                {
+
+                    p_code:
+                        code || null,
+
+                    p_teacher_username:
+                        teacherUsername,
+
+                    p_teacher_password:
+                        teacherPassword
+
+                }
+            );
+
+
+        rows =
+            Array.isArray(data)
+                ? data
+                : [];
+
+
+        const percentages =
+            rows.map(
+                percentage
+            );
+
+
+        const average =
+            percentages.length
+                ? Math.round(
+                    percentages.reduce(
+                        (a, b) =>
+                            a + b,
+                        0
+                    )
+                    /
+                    percentages.length
+                )
+                : 0;
+
+
+        const highest =
+            percentages.length
+                ? Math.max(
+                    ...percentages
+                )
+                : 0;
+
+
+        const highestIndex =
+            percentages.findIndex(
+                value =>
+                    value ===
+                    highest
+            );
+
+
+        $("total")
+            .textContent =
+                rows.length;
+
+
+        $("count")
+            .textContent =
+                rows.length;
+
+
+        $("avg")
+            .textContent =
+                average + "%";
+
+
+        $("high")
+            .textContent =
+                highest + "%";
+
+
+        $("highName")
+            .textContent =
+                highestIndex >= 0
+                    ? normalizeResult(
+                        rows[
+                            highestIndex
+                        ]
+                    ).name
+                    : "—";
+
+
+        const sorted =
+            rows
+                .slice()
+                .sort(
+                    (a, b) =>
+                        percentage(b) -
+                        percentage(a)
+                );
+
+
+        $("topStudents")
+            .innerHTML =
+                sorted
+                    .slice(
+                        0,
+                        3
+                    )
+                    .map(
+                        topCard
+                    )
+                    .join("")
+
+                ||
+
+                `
+                    <div class="student">
+                        لا توجد نتائج حتى الآن.
+                    </div>
+                `;
+
+
+        renderResults();
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        $("topStudents")
+            .innerHTML =
+                `
+                <div class="student">
+                    تعذر تحميل النتائج من الخادم.
+                </div>
+                `;
+    }
+}
+
+
+/* ============================================================
+   ADD QUESTION
+============================================================ */
+
+function addQuestion() {
+
+    q++;
+
+
+    const container =
+        document.createElement(
+            "div"
+        );
+
+
+    container.className =
+        "question";
+
+
+    container.innerHTML =
+        `
+
+        <div class="qbar">
+
+            <b>
+                السؤال ${q}
+            </b>
+
+            <button
+                type="button"
+                class="remove"
+            >
+                حذف
+            </button>
+
+        </div>
+
+
+        <label>
+            نص السؤال
+        </label>
+
+
+        <input
+            class="qt"
+            placeholder="اكتب السؤال هنا"
+        >
+
+
+        <label>
+            الاختيارات — اختر الإجابة الصحيحة
+        </label>
+
+
+        <div class="opts">
+
+            ${[
+                0,
+                1,
+                2,
+                3
+            ]
+            .map(
+                index =>
+                    `
+
+                    <div class="opt">
+
+                        <input
+                            type="radio"
+                            name="question_${q}"
+                            value="${index}"
+                            ${
+                                index === 0
+                                    ? "checked"
+                                    : ""
+                            }
+                        >
+
+
+                        <input
+                            class="qo"
+                            placeholder="الاختيار ${index + 1}"
+                        >
+
+                    </div>
+
+                    `
+            )
+            .join("")}
+
+        </div>
+
+        `;
+
+
+    container
+        .querySelector(
+            ".remove"
+        )
+        .onclick =
+            () =>
+                container.remove();
+
+
+    $("questions")
+        .append(
+            container
+        );
+}
+
+
+$("addQ")
+    .onclick =
+        addQuestion;
+
+
+/* ============================================================
+   CREATE EXAM
+============================================================ */
+
+$("createExam")
+    .onclick =
+        async () => {
+
+            try {
+
+                const title =
+                    $("examTitle")
+                        .value
+                        .trim()
+                    ||
+                    "امتحان اللغة العربية";
+
+
+                const duration =
+                    Number(
+                        $("duration")
+                            .value
+                    );
+
+
+                const availabilityDays =
+                    Number(
+                        $("availabilityDays")
+                            .value
+                    );
+
+
+                const elements =
+                    [
+                        ...document
+                            .querySelectorAll(
+                                ".question"
+                            )
+                    ];
+
+
+                if (
+                    elements.length === 0
+                ) {
+
+                    throw new Error(
+                        "أضف سؤالًا واحدًا على الأقل."
+                    );
+                }
+
+
+                const questions =
+                    elements.map(
+                        element => {
+
+                            const selected =
+                                element.querySelector(
+                                    'input[type="radio"]:checked'
+                                );
+
+
+                            return {
+
+                                text:
+                                    element
+                                        .querySelector(
+                                            ".qt"
+                                        )
+                                        .value
+                                        .trim(),
+
+
+                                options:
+                                    [
+                                        ...
+                                        element
+                                            .querySelectorAll(
+                                                ".qo"
+                                            )
+                                    ]
+                                    .map(
+                                        input =>
+                                            input
+                                                .value
+                                                .trim()
+                                    ),
+
+
+                                correct_index:
+                                    selected
+                                        ? Number(
+                                            selected.value
+                                        )
+                                        : 0
+                            };
+                        }
+                    );
+
+
+                if (
+                    duration < 1 ||
+                    duration > 1440
+                ) {
+
+                    throw new Error(
+                        "مدة حل الامتحان يجب أن تكون بين 1 و1440 دقيقة."
+                    );
+                }
+
+
+                if (
+                    availabilityDays <= 0 ||
+                    availabilityDays > 365
+                ) {
+
+                    throw new Error(
+                        "مدة إتاحة الامتحان يجب أن تكون أكبر من صفر وأقل من 365 يوم."
+                    );
+                }
+
+
+                if (
+                    questions.some(
+                        question =>
+                            !question.text ||
+                            question.options.length !== 4 ||
+                            question.options.some(
+                                option =>
+                                    !option
+                            )
+                    )
+                ) {
+
+                    throw new Error(
+                        "أكمل بيانات جميع الأسئلة والاختيارات."
+                    );
+                }
+
+
+                $("createExam")
+                    .disabled = true;
+
+
+                $("createExam")
+                    .textContent =
+                        "جاري إنشاء الامتحان...";
+
+
+                const data =
+                    await rpc(
+                        "create_public_exam_with_expiry",
+                        {
+
+                            p_title:
+                                title,
+
+                            p_duration_minutes:
+                                duration,
+
+                            p_questions:
+                                questions,
+
+                            p_availability_days:
+                                availabilityDays,
+
+                            p_teacher_username:
+                                teacherUsername,
+
+                            p_teacher_password:
+                                teacherPassword
+
+                        }
+                    );
+
+
+                const result =
+                    Array.isArray(data)
+                        ? data[0]
+                        : data;
+
+
+                const code =
+                    result?.code;
+
+
+                const expiresAt =
+                    result?.expires_at;
+
+
+                if (!code) {
+
+                    throw new Error(
+                        "لم يتم إنشاء الامتحان."
+                    );
+                }
+
+
+                /*
+                 * Only the exam code is stored.
+                 * The password is never stored.
+                 */
+
+                localStorage.setItem(
+                    "hasan_last_exam_code",
+                    code
+                );
+
+
+                const studentUrl =
+                    `${location.origin}${location.pathname.replace(
+                        /teacher\.html$/i,
+                        "index.html"
+                    )}?exam=${encodeURIComponent(
+                        code
+                    )}`;
+
+
+                $("examLink")
+                    .value =
+                        studentUrl;
+
+
+                if (
+                    expiresAt
+                ) {
+
+                    const date =
+                        new Date(
+                            expiresAt
+                        );
+
+
+                    $("shareExpiry")
+                        .textContent =
+                            `⏰ ينتهي فتح الامتحان في: ${date.toLocaleString("ar-EG")}`;
+
+                } else {
+
+                    $("shareExpiry")
+                        .textContent =
+                            `⏰ مدة الإتاحة: ${availabilityDays} يوم`;
+                }
+
+
+                $("share")
+                    .classList
+                    .remove("hidden");
+
+
+                $("createExam")
+                    .textContent =
+                        "إنشاء الامتحان";
+
+
+                $("createExam")
+                    .disabled = false;
+
+
+                alert(
+                    "تم إنشاء الامتحان بنجاح 🎉"
+                );
+
+
+                await loadResults();
+
+            } catch (error) {
+
+                console.error(error);
+
+
+                alert(
+                    cleanError(
+                        error.message
+                    )
+                );
+
+
+                $("createExam")
+                    .textContent =
+                        "إنشاء الامتحان";
+
+
+                $("createExam")
+                    .disabled = false;
+            }
+        };
+
+
+/* ============================================================
+   COPY LINK
+============================================================ */
+
+$("copy")
+    .onclick =
+        async () => {
+
+            const link =
+                $("examLink")
+                    .value;
+
+
+            if (!link) {
+                return;
+            }
+
+
+            try {
+
+                await navigator
+                    .clipboard
+                    .writeText(
+                        link
+                    );
+
+
+                $("copy")
+                    .textContent =
+                        "تم ✓";
+
+
+                setTimeout(
+                    () => {
+
+                        $("copy")
+                            .textContent =
+                                "نسخ";
+
+                    },
+                    1200
+                );
+
+            } catch (error) {
+
+                $("examLink")
+                    .select();
+
+
+                document
+                    .execCommand(
+                        "copy"
+                    );
+
+
+                $("copy")
+                    .textContent =
+                        "تم ✓";
+            }
+        };
+
+
+/* ============================================================
+   CLEAN ERROR
+============================================================ */
+
+function cleanError(
+    message
+) {
+
+    const text =
+        String(
+            message || ""
+        );
+
+
+    if (
+        text.includes(
+            "بيانات دخول"
+        )
+    ) {
+
+        return (
+            "بيانات دخول المدرس غير صحيحة."
+        );
+    }
+
+
+    if (
+        text.includes(
+            "غير مصرح"
+        )
+    ) {
+
+        return (
+            "ليس لديك صلاحية للوصول."
+        );
+    }
+
+
+    return text.replace(
+        /^Error:\s*/i,
+        ""
+    );
+}
+
+
+/* ============================================================
+   START TEACHER PANEL
+============================================================ */
+
+function startTeacherPanel() {
+
+    $("login")
+        .classList
+        .add("hidden");
+
+
+    $("app")
+        .classList
+        .remove("hidden");
+
+
+    $("app")
+        .setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+    $("app")
+        .removeAttribute(
+            "inert"
+        );
+
+
+    document.body
+        .classList
+        .add(
+            "authenticated"
+        );
+
+
+    if (
+        !document.querySelector(
+            ".question"
+        )
+    ) {
+
+        addQuestion();
+    }
+
+
+    loadResults();
+}
