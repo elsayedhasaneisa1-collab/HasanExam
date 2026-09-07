@@ -6,7 +6,8 @@ const SUPABASE_KEY =
 
 
 const $ =
-    id => document.getElementById(id);
+    id =>
+        document.getElementById(id);
 
 
 let rows = [];
@@ -15,17 +16,15 @@ let q = 0;
 
 
 /*
- * Credentials stay only in memory.
- * They are NOT stored in localStorage/sessionStorage.
+ * بيانات المدرس في الذاكرة فقط
  */
 let teacherUsername = "";
-
 let teacherPassword = "";
 
 
-/* ============================================================
+/* =========================================================
    RPC
-============================================================ */
+========================================================= */
 
 async function rpc(
     functionName,
@@ -85,6 +84,7 @@ async function rpc(
         throw new Error(
             message
         );
+
     }
 
 
@@ -94,12 +94,13 @@ async function rpc(
 
 
     return JSON.parse(text);
+
 }
 
 
-/* ============================================================
+/* =========================================================
    ESCAPE
-============================================================ */
+========================================================= */
 
 function esc(value) {
 
@@ -126,12 +127,13 @@ function esc(value) {
                         "&#039;"
                 }[character])
         );
+
 }
 
 
-/* ============================================================
-   NORMALIZE RESULT
-============================================================ */
+/* =========================================================
+   NORMALIZE
+========================================================= */
 
 function normalizeResult(
     value
@@ -151,7 +153,6 @@ function normalizeResult(
                 "اسم الطالب غير متاح"
             ),
 
-
         exam:
             String(
                 result.exam_title ??
@@ -160,7 +161,6 @@ function normalizeResult(
                 "امتحان"
             ),
 
-
         score:
             Number(
                 result.score ??
@@ -168,20 +168,21 @@ function normalizeResult(
                 0
             ),
 
-
         total:
             Number(
                 result.total_questions ??
                 result.total ??
                 0
             )
+
     };
+
 }
 
 
-/* ============================================================
+/* =========================================================
    PERCENTAGE
-============================================================ */
+========================================================= */
 
 function percentage(
     value
@@ -198,6 +199,7 @@ function percentage(
     ) {
 
         return 0;
+
     }
 
 
@@ -212,36 +214,39 @@ function percentage(
             )
         )
     );
+
 }
 
 
-/* ============================================================
+/* =========================================================
    MENU
-============================================================ */
+========================================================= */
 
 function openMenu() {
 
     $("menu")
-        .classList
+        ?.classList
         .add("open");
 
 
     $("overlay")
-        .classList
+        ?.classList
         .add("open");
+
 }
 
 
 function closeMenu() {
 
     $("menu")
-        .classList
+        ?.classList
         .remove("open");
 
 
     $("overlay")
-        .classList
+        ?.classList
         .remove("open");
+
 }
 
 
@@ -257,9 +262,9 @@ $("overlay").onclick =
     closeMenu;
 
 
-/* ============================================================
+/* =========================================================
    PAGES
-============================================================ */
+========================================================= */
 
 function showPage(
     pageId
@@ -284,6 +289,7 @@ function showPage(
         target
             .classList
             .remove("hidden");
+
     }
 
 
@@ -310,7 +316,9 @@ function showPage(
     ) {
 
         loadResults();
+
     }
+
 }
 
 
@@ -324,6 +332,7 @@ document
                     showPage(
                         button.dataset.page
                     );
+
         }
     );
 
@@ -338,13 +347,14 @@ document
                     showPage(
                         button.dataset.go
                     );
+
         }
     );
 
 
-/* ============================================================
+/* =========================================================
    LOGIN
-============================================================ */
+========================================================= */
 
 $("loginForm")
     .onsubmit =
@@ -378,18 +388,13 @@ $("loginForm")
                         "اكتب اسم المستخدم وكلمة المرور.";
 
                 return;
+
             }
 
 
-            /*
-             * Frontend check
-             */
-
             if (
-                username !==
-                    "Hasan" ||
-                password !==
-                    "25808"
+                username !== "Hasan" ||
+                password !== "25808"
             ) {
 
                 $("err")
@@ -397,27 +402,26 @@ $("loginForm")
                         "بيانات الدخول غير صحيحة.";
 
                 return;
+
             }
 
 
-            /*
-             * Keep credentials only in memory.
-             */
-
             teacherUsername =
                 username;
+
 
             teacherPassword =
                 password;
 
 
             startTeacherPanel();
+
         };
 
 
-/* ============================================================
+/* =========================================================
    LOGOUT
-============================================================ */
+========================================================= */
 
 $("logout")
     .onclick =
@@ -434,12 +438,13 @@ $("logout")
             );
 
             location.reload();
+
         };
 
 
-/* ============================================================
+/* =========================================================
    REFRESH
-============================================================ */
+========================================================= */
 
 $("refresh")
     .onclick =
@@ -461,9 +466,9 @@ $("order")
         renderResults;
 
 
-/* ============================================================
+/* =========================================================
    RESULT CARD
-============================================================ */
+========================================================= */
 
 function resultCard(
     raw
@@ -497,6 +502,7 @@ function resultCard(
 
 
     return `
+
         <div
             class="result"
             data-index="${rows.indexOf(raw)}"
@@ -547,13 +553,15 @@ function resultCard(
             </div>
 
         </div>
+
     `;
+
 }
 
 
-/* ============================================================
-   TOP STUDENT CARD
-============================================================ */
+/* =========================================================
+   TOP STUDENT
+========================================================= */
 
 function topCard(
     raw,
@@ -573,6 +581,7 @@ function topCard(
 
 
     return `
+
         <article class="student">
 
             <div
@@ -618,13 +627,15 @@ function topCard(
             </div>
 
         </article>
+
     `;
+
 }
 
 
-/* ============================================================
+/* =========================================================
    RENDER RESULTS
-============================================================ */
+========================================================= */
 
 function renderResults() {
 
@@ -641,15 +652,16 @@ function renderResults() {
                 normalizeResult(
                     item
                 )
-                .name
-                .toLowerCase()
-                .includes(search)
+                    .name
+                    .toLowerCase()
+                    .includes(search)
         );
 
 
     filtered.sort(
         (a, b) =>
             $("order").value === "desc"
+
                 ? percentage(b) -
                   percentage(a)
 
@@ -660,19 +672,22 @@ function renderResults() {
 
     $("resultsList")
         .innerHTML =
-            filtered.length
 
-                ? filtered
-                    .map(
-                        resultCard
-                    )
-                    .join("")
+        filtered.length
 
-                : `
-                    <div class="student">
-                        لا توجد نتائج مطابقة.
-                    </div>
-                `;
+            ? filtered
+                .map(
+                    resultCard
+                )
+                .join("")
+
+            :
+
+            `
+                <div class="student">
+                    لا توجد نتائج مطابقة.
+                </div>
+            `;
 
 
     document
@@ -694,15 +709,18 @@ function renderResults() {
                         showDetails(
                             rows[index]
                         );
+
                     };
+
             }
         );
+
 }
 
 
-/* ============================================================
+/* =========================================================
    DETAILS
-============================================================ */
+========================================================= */
 
 function showDetails(
     raw
@@ -735,104 +753,106 @@ function showDetails(
 
     $("modalBody")
         .innerHTML =
-            `
 
-            <div class="modal-stat">
+        `
 
-                <div>
+        <div class="modal-stat">
 
-                    <small>
-                        الامتحان
-                    </small>
+            <div>
 
-                    <b>
-                        ${esc(result.exam)}
-                    </b>
+                <small>
+                    الامتحان
+                </small>
 
-                </div>
-
-
-                <div>
-
-                    <small>
-                        النسبة
-                    </small>
-
-                    <b>
-                        ${percent}%
-                    </b>
-
-                </div>
-
-
-                <div>
-
-                    <small>
-                        الإجابات الصحيحة
-                    </small>
-
-                    <b>
-                        ${result.score}
-                    </b>
-
-                </div>
-
-
-                <div>
-
-                    <small>
-                        الإجابات الخاطئة
-                    </small>
-
-                    <b>
-                        ${wrong}
-                    </b>
-
-                </div>
-
-
-                <div>
-
-                    <small>
-                        الدرجة
-                    </small>
-
-                    <b>
-                        ${result.score} /
-                        ${result.total}
-                    </b>
-
-                </div>
-
-
-                <div>
-
-                    <small>
-                        التقييم
-                    </small>
-
-                    <b>
-
-                        ${
-                            percent >= 90
-                                ? "ممتاز 🏆"
-
-                                : percent >= 75
-                                    ? "جيد جدًا ⭐"
-
-                                    : percent >= 50
-                                        ? "جيد 👍"
-
-                                        : "يحتاج مراجعة 📚"
-                        }
-
-                    </b>
-
-                </div>
+                <b>
+                    ${esc(result.exam)}
+                </b>
 
             </div>
 
-            `;
+
+            <div>
+
+                <small>
+                    النسبة
+                </small>
+
+                <b>
+                    ${percent}%
+                </b>
+
+            </div>
+
+
+            <div>
+
+                <small>
+                    الإجابات الصحيحة
+                </small>
+
+                <b>
+                    ${result.score}
+                </b>
+
+            </div>
+
+
+            <div>
+
+                <small>
+                    الإجابات الخاطئة
+                </small>
+
+                <b>
+                    ${wrong}
+                </b>
+
+            </div>
+
+
+            <div>
+
+                <small>
+                    الدرجة
+                </small>
+
+                <b>
+                    ${result.score} /
+                    ${result.total}
+                </b>
+
+            </div>
+
+
+            <div>
+
+                <small>
+                    التقييم
+                </small>
+
+                <b>
+
+                    ${
+                        percent >= 90
+                            ? "ممتاز 🏆"
+
+                            : percent >= 75
+                                ? "جيد جدًا ⭐"
+
+                                : percent >= 50
+                                    ? "جيد 👍"
+
+                                    : "يحتاج مراجعة 📚"
+                    }
+
+                </b>
+
+            </div>
+
+        </div>
+
+        `;
+
 }
 
 
@@ -856,13 +876,15 @@ $("detailsModal")
                 $("detailsModal")
                     .classList
                     .add("hidden");
+
             }
+
         };
 
 
-/* ============================================================
+/* =========================================================
    PDF
-============================================================ */
+========================================================= */
 
 $("downloadPdf")
     .onclick =
@@ -877,6 +899,7 @@ $("downloadPdf")
                 );
 
                 return;
+
             }
 
 
@@ -887,15 +910,17 @@ $("downloadPdf")
             if (!jsPDF) {
 
                 alert(
-                    "أداة PDF لم يتم تحميلها بعد."
+                    "أداة PDF لم يتم تحميلها."
                 );
 
                 return;
+
             }
 
 
             const doc =
                 new jsPDF({
+
                     orientation:
                         "landscape",
 
@@ -904,6 +929,7 @@ $("downloadPdf")
 
                     format:
                         "a4"
+
                 });
 
 
@@ -952,6 +978,7 @@ $("downloadPdf")
 
 
                             return [
+
                                 index + 1,
 
                                 result.name,
@@ -967,7 +994,9 @@ $("downloadPdf")
                                 ),
 
                                 `${percentage(item)}%`
+
                             ];
+
                         }
                     );
 
@@ -978,46 +1007,56 @@ $("downloadPdf")
             ) {
 
                 alert(
-                    "إضافة PDF غير جاهزة. أعد تحميل الصفحة."
+                    "إضافة PDF غير جاهزة. تأكد من تحميل AutoTable."
                 );
 
                 return;
+
             }
 
 
             doc.autoTable({
 
-                startY: 80,
+                startY:
+                    80,
 
-                head: [[
-                    "#",
-                    "Student",
-                    "Exam",
-                    "Score",
-                    "Wrong",
-                    "Percentage"
-                ]],
+                head:
+                    [[
+                        "#",
+                        "Student",
+                        "Exam",
+                        "Score",
+                        "Wrong",
+                        "Percentage"
+                    ]],
 
-                body: data,
+                body:
+                    data,
 
                 theme:
                     "grid",
 
-                styles: {
-                    fontSize: 9,
-                    cellPadding: 6
-                },
+                styles:
+                    {
+                        fontSize:
+                            9,
 
-                headStyles: {
-                    fillColor: [
-                        22,
-                        70,
-                        110
-                    ],
+                        cellPadding:
+                            6
+                    },
 
-                    textColor:
-                        255
-                }
+                headStyles:
+                    {
+                        fillColor:
+                            [
+                                22,
+                                70,
+                                110
+                            ],
+
+                        textColor:
+                            255
+                    }
 
             });
 
@@ -1025,12 +1064,13 @@ $("downloadPdf")
             doc.save(
                 "Hasan-Eissa-Results.pdf"
             );
+
         };
 
 
-/* ============================================================
+/* =========================================================
    LOAD RESULTS
-============================================================ */
+========================================================= */
 
 async function loadResults() {
 
@@ -1040,6 +1080,7 @@ async function loadResults() {
     ) {
 
         return;
+
     }
 
 
@@ -1083,23 +1124,30 @@ async function loadResults() {
 
         const average =
             percentages.length
+
                 ? Math.round(
                     percentages.reduce(
-                        (a, b) =>
+                        (
+                            a,
+                            b
+                        ) =>
                             a + b,
                         0
                     )
                     /
                     percentages.length
                 )
+
                 : 0;
 
 
         const highest =
             percentages.length
+
                 ? Math.max(
                     ...percentages
                 )
+
                 : 0;
 
 
@@ -1133,13 +1181,16 @@ async function loadResults() {
 
         $("highName")
             .textContent =
-                highestIndex >= 0
-                    ? normalizeResult(
-                        rows[
-                            highestIndex
-                        ]
-                    ).name
-                    : "—";
+
+            highestIndex >= 0
+
+                ? normalizeResult(
+                    rows[
+                        highestIndex
+                    ]
+                ).name
+
+                : "—";
 
 
         const sorted =
@@ -1154,46 +1205,52 @@ async function loadResults() {
 
         $("topStudents")
             .innerHTML =
-                sorted
-                    .slice(
-                        0,
-                        3
-                    )
-                    .map(
-                        topCard
-                    )
-                    .join("")
 
-                ||
+            sorted
+                .slice(
+                    0,
+                    3
+                )
+                .map(
+                    topCard
+                )
+                .join("")
 
-                `
-                    <div class="student">
-                        لا توجد نتائج حتى الآن.
-                    </div>
-                `;
+            ||
+
+            `
+                <div class="student">
+                    لا توجد نتائج حتى الآن.
+                </div>
+            `;
 
 
         renderResults();
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            error
+        );
 
 
         $("topStudents")
             .innerHTML =
-                `
+
+            `
                 <div class="student">
                     تعذر تحميل النتائج من الخادم.
                 </div>
-                `;
+            `;
+
     }
+
 }
 
 
-/* ============================================================
+/* =========================================================
    ADD QUESTION
-============================================================ */
+========================================================= */
 
 function addQuestion() {
 
@@ -1211,6 +1268,7 @@ function addQuestion() {
 
 
     container.innerHTML =
+
         `
 
         <div class="qbar">
@@ -1247,40 +1305,37 @@ function addQuestion() {
 
         <div class="opts">
 
-            ${[
-                0,
-                1,
-                2,
-                3
-            ]
-            .map(
-                index =>
-                    `
+            ${
+                [0,1,2,3]
+                    .map(
+                        index =>
 
-                    <div class="opt">
+                            `
 
-                        <input
-                            type="radio"
-                            name="question_${q}"
-                            value="${index}"
-                            ${
-                                index === 0
-                                    ? "checked"
-                                    : ""
-                            }
-                        >
+                            <div class="opt">
 
+                                <input
+                                    type="radio"
+                                    name="question_${q}"
+                                    value="${index}"
+                                    ${
+                                        index === 0
+                                            ? "checked"
+                                            : ""
+                                    }
+                                >
 
-                        <input
-                            class="qo"
-                            placeholder="الاختيار ${index + 1}"
-                        >
+                                <input
+                                    class="qo"
+                                    placeholder="الاختيار ${index + 1}"
+                                >
 
-                    </div>
+                            </div>
 
-                    `
-            )
-            .join("")}
+                            `
+                    )
+                    .join("")
+            }
 
         </div>
 
@@ -1300,6 +1355,7 @@ function addQuestion() {
         .append(
             container
         );
+
 }
 
 
@@ -1308,9 +1364,9 @@ $("addQ")
         addQuestion;
 
 
-/* ============================================================
+/* =========================================================
    CREATE EXAM
-============================================================ */
+========================================================= */
 
 $("createExam")
     .onclick =
@@ -1342,7 +1398,8 @@ $("createExam")
 
                 const elements =
                     [
-                        ...document
+                        ...
+                        document
                             .querySelectorAll(
                                 ".question"
                             )
@@ -1356,6 +1413,7 @@ $("createExam")
                     throw new Error(
                         "أضف سؤالًا واحدًا على الأقل."
                     );
+
                 }
 
 
@@ -1369,32 +1427,36 @@ $("createExam")
                                 );
 
 
-                            return {
+                            const text =
+                                element
+                                    .querySelector(
+                                        ".qt"
+                                    )
+                                    .value
+                                    .trim();
 
-                                text:
+
+                            const options =
+                                [
+                                    ...
                                     element
-                                        .querySelector(
-                                            ".qt"
+                                        .querySelectorAll(
+                                            ".qo"
                                         )
-                                        .value
-                                        .trim(),
-
-
-                                options:
-                                    [
-                                        ...
-                                        element
-                                            .querySelectorAll(
-                                                ".qo"
-                                            )
-                                    ]
+                                ]
                                     .map(
                                         input =>
                                             input
                                                 .value
                                                 .trim()
-                                    ),
+                                    );
 
+
+                            return {
+
+                                text,
+
+                                options,
 
                                 correct_index:
                                     selected
@@ -1402,7 +1464,9 @@ $("createExam")
                                             selected.value
                                         )
                                         : 0
+
                             };
+
                         }
                     );
 
@@ -1415,6 +1479,7 @@ $("createExam")
                     throw new Error(
                         "مدة حل الامتحان يجب أن تكون بين 1 و1440 دقيقة."
                     );
+
                 }
 
 
@@ -1426,6 +1491,7 @@ $("createExam")
                     throw new Error(
                         "مدة إتاحة الامتحان يجب أن تكون أكبر من صفر وأقل من 365 يوم."
                     );
+
                 }
 
 
@@ -1444,6 +1510,7 @@ $("createExam")
                     throw new Error(
                         "أكمل بيانات جميع الأسئلة والاختيارات."
                     );
+
                 }
 
 
@@ -1489,26 +1556,20 @@ $("createExam")
                         : data;
 
 
-                const code =
-                    result?.code;
-
-
-                const expiresAt =
-                    result?.expires_at;
-
-
-                if (!code) {
+                if (
+                    !result?.code
+                ) {
 
                     throw new Error(
                         "لم يتم إنشاء الامتحان."
                     );
+
                 }
 
 
-                /*
-                 * Only the exam code is stored.
-                 * The password is never stored.
-                 */
+                const code =
+                    result.code;
+
 
                 localStorage.setItem(
                     "hasan_last_exam_code",
@@ -1531,24 +1592,20 @@ $("createExam")
 
 
                 if (
-                    expiresAt
+                    result.expires_at
                 ) {
 
-                    const date =
-                        new Date(
-                            expiresAt
-                        );
-
-
                     $("shareExpiry")
                         .textContent =
-                            `⏰ ينتهي فتح الامتحان في: ${date.toLocaleString("ar-EG")}`;
 
-                } else {
+                        `⏰ ينتهي فتح الامتحان في: ${
+                            new Date(
+                                result.expires_at
+                            ).toLocaleString(
+                                "ar-EG"
+                            )
+                        }`;
 
-                    $("shareExpiry")
-                        .textContent =
-                            `⏰ مدة الإتاحة: ${availabilityDays} يوم`;
                 }
 
 
@@ -1558,12 +1615,12 @@ $("createExam")
 
 
                 $("createExam")
-                    .textContent =
-                        "إنشاء الامتحان";
+                    .disabled = false;
 
 
                 $("createExam")
-                    .disabled = false;
+                    .textContent =
+                        "إنشاء الامتحان";
 
 
                 alert(
@@ -1575,7 +1632,9 @@ $("createExam")
 
             } catch (error) {
 
-                console.error(error);
+                console.error(
+                    error
+                );
 
 
                 alert(
@@ -1586,19 +1645,21 @@ $("createExam")
 
 
                 $("createExam")
-                    .textContent =
-                        "إنشاء الامتحان";
+                    .disabled = false;
 
 
                 $("createExam")
-                    .disabled = false;
+                    .textContent =
+                        "إنشاء الامتحان";
+
             }
+
         };
 
 
-/* ============================================================
-   COPY LINK
-============================================================ */
+/* =========================================================
+   COPY
+========================================================= */
 
 $("copy")
     .onclick =
@@ -1639,7 +1700,7 @@ $("copy")
                     1200
                 );
 
-            } catch (error) {
+            } catch (_) {
 
                 $("examLink")
                     .select();
@@ -1650,62 +1711,33 @@ $("copy")
                         "copy"
                     );
 
-
-                $("copy")
-                    .textContent =
-                        "تم ✓";
             }
+
         };
 
 
-/* ============================================================
-   CLEAN ERROR
-============================================================ */
+/* =========================================================
+   ERROR
+========================================================= */
 
 function cleanError(
     message
 ) {
 
-    const text =
-        String(
-            message || ""
+    return String(
+        message || ""
+    )
+        .replace(
+            /^Error:\s*/i,
+            ""
         );
 
-
-    if (
-        text.includes(
-            "بيانات دخول"
-        )
-    ) {
-
-        return (
-            "بيانات دخول المدرس غير صحيحة."
-        );
-    }
-
-
-    if (
-        text.includes(
-            "غير مصرح"
-        )
-    ) {
-
-        return (
-            "ليس لديك صلاحية للوصول."
-        );
-    }
-
-
-    return text.replace(
-        /^Error:\s*/i,
-        ""
-    );
 }
 
 
-/* ============================================================
-   START TEACHER PANEL
-============================================================ */
+/* =========================================================
+   START PANEL
+========================================================= */
 
 function startTeacherPanel() {
 
@@ -1746,8 +1778,10 @@ function startTeacherPanel() {
     ) {
 
         addQuestion();
+
     }
 
 
     loadResults();
+
 }

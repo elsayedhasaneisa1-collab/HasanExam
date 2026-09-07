@@ -10,9 +10,9 @@ const client =
         SUPABASE_KEY
     );
 
-
 const $ =
-    id => document.getElementById(id);
+    id =>
+        document.getElementById(id);
 
 
 let exam = null;
@@ -20,14 +20,16 @@ let attemptId = null;
 let questions = [];
 let answers = [];
 let current = 0;
+
 let endAt = 0;
 let timerId = null;
+
 let submitted = false;
 
 
-/* ============================================================
+/* =========================================================
    INIT
-============================================================ */
+========================================================= */
 
 async function init() {
 
@@ -39,20 +41,16 @@ async function init() {
 
     if (!code) {
 
-        fail(
+        return fail(
             "رابط الامتحان غير صحيح."
         );
 
-        return;
     }
 
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const { data, error } =
             await client.rpc(
                 "get_public_exam_with_expiry",
                 {
@@ -63,24 +61,17 @@ async function init() {
 
         if (error) {
 
-            fail(
-                readableError(error)
-            );
+            throw error;
 
-            return;
         }
 
 
-        if (
-            !data ||
-            !data.exam
-        ) {
+        if (!data || !data.exam) {
 
-            fail(
-                "الامتحان غير موجود أو تم إغلاقه."
+            throw new Error(
+                "الامتحان غير موجود."
             );
 
-            return;
         }
 
 
@@ -90,13 +81,39 @@ async function init() {
 
         $("examTitle")
             .textContent =
-                exam.title ||
-                "امتحان اللغة العربية";
+                exam.title;
 
 
         $("examInfo")
             .textContent =
                 `${exam.question_count} سؤال • الوقت ${exam.duration_minutes} دقيقة`;
+
+
+        if (data.expires_at) {
+
+            const expiry =
+                new Date(
+                    data.expires_at
+                );
+
+
+            const notice =
+                document.createElement(
+                    "div"
+                );
+
+
+            notice.className =
+                "notice";
+
+
+            notice.textContent =
+                `⏰ متاح حتى ${expiry.toLocaleString("ar-EG")}`;
+
+
+            $("examInfo")
+                .after(notice);
+        }
 
 
         $("loading")
@@ -117,15 +134,18 @@ async function init() {
         console.error(error);
 
         fail(
-            "تعذر الاتصال بالخادم."
+            cleanError(
+                error.message
+            )
         );
+
     }
 }
 
 
-/* ============================================================
+/* =========================================================
    FAIL
-============================================================ */
+========================================================= */
 
 function fail(message) {
 
@@ -151,89 +171,13 @@ function fail(message) {
 
     $("startBtn")
         .disabled = true;
+
 }
 
 
-/* ============================================================
-   ERROR MESSAGE
-============================================================ */
-
-function readableError(error) {
-
-    const message =
-        error?.message ||
-        "حدث خطأ غير معروف.";
-
-
-    if (
-        message.includes(
-            "انتهت صلاحية"
-        )
-    ) {
-
-        return (
-            "⛔ انتهت صلاحية هذا الامتحان " +
-            "ولا يمكن الدخول إليه."
-        );
-    }
-
-
-    if (
-        message.includes(
-            "لا يمكن بدء"
-        )
-    ) {
-
-        return (
-            "⛔ انتهت صلاحية هذا الامتحان " +
-            "ولا يمكن بدء محاولة جديدة."
-        );
-    }
-
-
-    if (
-        message.includes(
-            "لم يبدأ"
-        )
-    ) {
-
-        return (
-            "⏳ الامتحان لم يبدأ بعد."
-        );
-    }
-
-
-    if (
-        message.includes(
-            "غير موجود"
-        )
-    ) {
-
-        return (
-            "❌ الامتحان غير موجود."
-        );
-    }
-
-
-    if (
-        message.includes(
-            "انتهى وقت"
-        )
-    ) {
-
-        return (
-            "⏰ انتهى وقت الامتحان."
-        );
-    }
-
-
-    return message;
-}
-
-
-/* ============================================================
-   START BUTTON
-============================================================ */
+/* =========================================================
+   START
+========================================================= */
 
 $("startBtn")
     .onclick =
@@ -250,15 +194,12 @@ $("studentName")
             ) {
 
                 startExam();
+
             }
 
         }
     );
 
-
-/* ============================================================
-   START EXAM
-============================================================ */
 
 async function startExam() {
 
@@ -275,19 +216,14 @@ async function startExam() {
                 "اكتب اسمك أولًا 😊";
 
         return;
+
     }
 
 
-    if (
-        !exam ||
-        !exam.code
-    ) {
-
-        $("error")
-            .textContent =
-                "بيانات الامتحان غير متاحة.";
+    if (!exam) {
 
         return;
+
     }
 
 
@@ -302,10 +238,7 @@ async function startExam() {
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const { data, error } =
             await client.rpc(
                 "start_public_attempt_with_expiry",
                 {
@@ -320,32 +253,8 @@ async function startExam() {
 
         if (error) {
 
-            $("startBtn")
-                .disabled = false;
+            throw error;
 
-
-            $("error")
-                .textContent =
-                    readableError(error);
-
-            return;
-        }
-
-
-        if (
-            !data ||
-            !data.attempt_id
-        ) {
-
-            $("startBtn")
-                .disabled = false;
-
-
-            $("error")
-                .textContent =
-                    "تعذر إنشاء محاولة الامتحان.";
-
-            return;
         }
 
 
@@ -365,15 +274,10 @@ async function startExam() {
             questions.length === 0
         ) {
 
-            $("startBtn")
-                .disabled = false;
+            throw new Error(
+                "الامتحان لا يحتوي على أسئلة."
+            );
 
-
-            $("error")
-                .textContent =
-                    "الامتحان لا يحتوي على أسئلة.";
-
-            return;
         }
 
 
@@ -387,24 +291,6 @@ async function startExam() {
             new Date(
                 data.ends_at
             ).getTime();
-
-
-        if (
-            !Number.isFinite(
-                endAt
-            )
-        ) {
-
-            $("startBtn")
-                .disabled = false;
-
-
-            $("error")
-                .textContent =
-                    "تعذر تحديد وقت انتهاء الامتحان.";
-
-            return;
-        }
 
 
         $("start")
@@ -450,26 +336,26 @@ async function startExam() {
 
         $("error")
             .textContent =
-                "تعذر الاتصال بالخادم.";
+                cleanError(
+                    error.message
+                );
+
     }
+
 }
 
 
-/* ============================================================
+/* =========================================================
    TIMER
-============================================================ */
+========================================================= */
 
 function updateTimer() {
-
-    if (!endAt) {
-        return;
-    }
-
 
     const left =
         Math.max(
             0,
-            endAt - Date.now()
+            endAt -
+            Date.now()
         );
 
 
@@ -491,13 +377,21 @@ function updateTimer() {
 
     $("timer")
         .textContent =
-            String(minutes)
-                .padStart(2, "0")
+            String(
+                minutes
+            ).padStart(
+                2,
+                "0"
+            )
             +
             ":"
             +
-            String(sec)
-                .padStart(2, "0");
+            String(
+                sec
+            ).padStart(
+                2,
+                "0"
+            );
 
 
     if (
@@ -509,14 +403,18 @@ function updateTimer() {
         );
 
 
-        submitExam(true);
+        submitExam(
+            true
+        );
+
     }
+
 }
 
 
-/* ============================================================
-   RENDER QUESTION
-============================================================ */
+/* =========================================================
+   RENDER
+========================================================= */
 
 function render() {
 
@@ -536,31 +434,33 @@ function render() {
 
     $("question")
         .innerHTML =
-            `
-            <div class="q">
-                ${esc(question.text)}
-            </div>
 
-            ${
-                question.options
-                    .map(
-                        (option, index) =>
-                            `
-                            <button
-                                class="option ${
-                                    answers[current] === index
-                                        ? "selected"
-                                        : ""
-                                }"
-                                data-index="${index}"
-                            >
-                                ${esc(option)}
-                            </button>
-                            `
-                    )
-                    .join("")
-            }
-            `;
+        `
+        <div class="q">
+            ${esc(question.text)}
+        </div>
+
+        ${question.options
+            .map(
+                (option, index) =>
+
+                    `
+                    <button
+                        type="button"
+                        class="option ${
+                            answers[current] === index
+                                ? "selected"
+                                : ""
+                        }"
+                        data-index="${index}"
+                    >
+                        ${esc(option)}
+                    </button>
+                    `
+            )
+            .join("")
+        }
+        `;
 
 
     document
@@ -573,20 +473,13 @@ function render() {
                 button.onclick =
                     () => {
 
-                        if (
-                            submitted
-                        ) {
-                            return;
-                        }
-
-
                         answers[current] =
                             Number(
                                 button.dataset.index
                             );
 
-
                         render();
+
                     };
 
             }
@@ -605,7 +498,8 @@ function render() {
                 *
                 100
             )
-            + "%";
+            +
+            "%";
 
 
     $("prev")
@@ -629,12 +523,13 @@ function render() {
             current !==
                 questions.length - 1
         );
+
 }
 
 
-/* ============================================================
+/* =========================================================
    NAVIGATION
-============================================================ */
+========================================================= */
 
 $("prev")
     .onclick =
@@ -647,7 +542,9 @@ $("prev")
                 current--;
 
                 render();
+
             }
+
         };
 
 
@@ -663,7 +560,9 @@ $("next")
                 current++;
 
                 render();
+
             }
+
         };
 
 
@@ -673,12 +572,12 @@ $("submit")
             submitExam(false);
 
 
-/* ============================================================
+/* =========================================================
    SUBMIT
-============================================================ */
+========================================================= */
 
 async function submitExam(
-    automatic = false
+    automatic
 ) {
 
     if (submitted) {
@@ -697,11 +596,13 @@ async function submitExam(
     const payload =
         questions.map(
             (question, index) => ({
+
                 question_id:
                     question.id,
 
                 selected_index:
                     answers[index]
+
             })
         );
 
@@ -723,10 +624,7 @@ async function submitExam(
 
     try {
 
-        const {
-            data,
-            error
-        } =
+        const { data, error } =
             await client.rpc(
                 "submit_public_attempt",
                 {
@@ -741,55 +639,32 @@ async function submitExam(
 
         if (error) {
 
-            $("score")
-                .innerHTML =
-                    `
-                    <p class="error">
-                        ${esc(
-                            readableError(
-                                error
-                            )
-                        )}
-                    </p>
-                    `;
+            throw error;
 
-            return;
         }
-
-
-        const score =
-            Number(
-                data?.score || 0
-            );
-
-
-        const total =
-            Number(
-                data?.total ||
-                questions.length
-            );
 
 
         $("score")
             .innerHTML =
-                `
-                <div
-                    style="
-                        font-size:30px;
-                        font-weight:900;
-                    "
-                >
-                    ${score} / ${total}
-                </div>
 
-                <p>
-                    ${
-                        automatic
-                            ? "⏰ انتهى الوقت وتم التسليم تلقائيًا."
-                            : "🎉 تم التسليم بنجاح."
-                    }
-                </p>
-                `;
+            `
+            <div
+                style="
+                    font-size:30px;
+                    font-weight:900;
+                "
+            >
+                ${data.score} / ${data.total}
+            </div>
+
+            <p>
+                ${
+                    automatic
+                        ? "⏰ انتهى الوقت وتم التسليم تلقائيًا."
+                        : "🎉 تم التسليم بنجاح."
+                }
+            </p>
+            `;
 
     } catch (error) {
 
@@ -798,18 +673,22 @@ async function submitExam(
 
         $("score")
             .innerHTML =
-                `
-                <p class="error">
-                    حدث خطأ أثناء تسليم الامتحان.
-                </p>
-                `;
+
+            `
+            <p class="error">
+                حدث خطأ أثناء تسليم الامتحان:
+                ${esc(error.message)}
+            </p>
+            `;
+
     }
+
 }
 
 
-/* ============================================================
+/* =========================================================
    ESCAPE
-============================================================ */
+========================================================= */
 
 function esc(value) {
 
@@ -836,11 +715,31 @@ function esc(value) {
                         "&#039;"
                 }[character])
         );
+
 }
 
 
-/* ============================================================
-   START
-============================================================ */
+/* =========================================================
+   ERROR
+========================================================= */
+
+function cleanError(
+    message
+) {
+
+    const text =
+        String(
+            message || ""
+        );
+
+
+    return text
+        .replace(
+            /^Error:\s*/i,
+            ""
+        );
+
+}
+
 
 init();
