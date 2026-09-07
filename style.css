@@ -1,267 +1,432 @@
+/* ============================================================
+   تصميم مبسط وكبير للطلاب الابتدائي
+   ============================================================ */
+
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 body {
-  margin: 0;
-  min-height: 100vh;
-  background: radial-gradient(circle at top, #123968 0%, #071426 45%, #030914 100%);
-  color: #f5f8ff;
-  font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
-  direction: rtl;
+    background: linear-gradient(135deg, #0a1628, #1a2a4a);
+    color: #ffffff;
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    direction: rtl;
+    min-height: 100vh;
+    padding: 10px;
 }
 
-.page {
-  width: min(760px, 100%);
-  margin: auto;
-  padding: 18px;
-}
-
-.brand {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  margin: 8px 0 22px;
-}
-
-.logo {
-  width: 48px;
-  height: 48px;
-  border-radius: 15px;
-  display: grid;
-  place-items: center;
-  background: linear-gradient(135deg, #1994ff, #0757bd);
-  font-size: 25px;
-  font-weight: 900;
-  box-shadow: 0 10px 30px rgba(5, 124, 255, 0.2);
-  flex-shrink: 0;
-}
-
-.brand h1 {
-  font-size: 20px;
-  margin: 0;
-}
-
-.brand p {
-  font-size: 12px;
-  opacity: 0.65;
-  margin: 4px 0;
-}
-
-.card {
-  background: rgba(255, 255, 255, 0.075);
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 24px;
-  padding: 24px;
-  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.33);
-  backdrop-filter: blur(15px);
-}
-
-.card.center {
-  text-align: center;
-}
-
-.book,
-.trophy {
-  font-size: 58px;
-  margin: 5px;
-}
-
-.badge {
-  display: inline-block;
-  background: rgba(22, 136, 255, 0.133);
-  border: 1px solid rgba(22, 136, 255, 0.333);
-  color: #79c0ff;
-  padding: 7px 12px;
-  border-radius: 99px;
-  font-size: 13px;
-}
-
-.card h2 {
-  font-size: 25px;
-  margin: 13px 0 8px;
-}
-
-.card p {
-  opacity: 0.75;
-  line-height: 1.7;
-}
-
-.notice {
-  background: rgba(255, 255, 255, 0.035);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 14px;
-  padding: 12px;
-  margin: 18px 0;
-  text-align: right;
-  font-size: 14px;
-}
-
-input {
-  width: 100%;
-  padding: 16px;
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  background: #061225;
-  color: #fff;
-  font-size: 17px;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-input:focus {
-  border-color: #168cff;
-  box-shadow: 0 0 0 3px rgba(22, 136, 255, 0.2);
-}
-
-input::placeholder {
-  color: rgba(255, 255, 255, 0.3);
-}
-
-button {
-  border: 0;
-  border-radius: 14px;
-  padding: 14px 18px;
-  background: rgba(255, 255, 255, 0.062);
-  color: #fff;
-  font-size: 16px;
-  font-weight: 800;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-button:hover:not(:disabled) {
-  transform: translateY(-2px);
-}
-
-button:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-#startBtn {
-  width: 100%;
-  margin-top: 12px;
-  background: linear-gradient(135deg, #168cff, #0865ce);
-}
-
-#startBtn:hover:not(:disabled) {
-  box-shadow: 0 8px 25px rgba(22, 136, 255, 0.4);
-}
-
-.submit {
-  width: 100%;
-  margin-top: 14px;
-  background: #0da66d;
-}
-
-.submit:hover:not(:disabled) {
-  box-shadow: 0 8px 25px rgba(13, 166, 109, 0.4);
-}
-
-.examTop {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 14px;
-}
-
-.examTop small {
-  display: block;
-  opacity: 0.6;
-  margin-top: 5px;
-}
-
-.timer {
-  font-size: 23px;
-  font-weight: 900;
-  background: #061225;
-  border: 1px solid rgba(255, 255, 255, 0.083);
-  padding: 11px 15px;
-  border-radius: 14px;
-  min-width: 96px;
-  text-align: center;
-  transition: color 0.3s ease;
-}
-
-.progressLine {
-  height: 7px;
-  background: rgba(255, 255, 255, 0.07);
-  border-radius: 20px;
-  overflow: hidden;
-}
-
-.progressLine span {
-  display: block;
-  height: 100%;
-  width: 0;
-  background: linear-gradient(90deg, #1994ff, #5ce1ff);
-  transition: width 0.3s ease;
-}
-
-.qmeta {
-  font-size: 13px;
-  opacity: 0.6;
-  margin: 20px 0 7px;
-}
-
-.q {
-  font-size: 21px;
-  line-height: 1.8;
-  font-weight: 800;
-  margin-bottom: 14px;
-}
-
-.nav {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 18px;
-  gap: 12px;
-}
-
-.nav button {
-  flex: 1;
-  min-width: 80px;
-}
-
+/* ===== عام ===== */
 .hidden {
-  display: none !important;
+    display: none !important;
 }
 
 .error {
-  color: #ff7187 !important;
+    color: #ff6b6b !important;
+    font-size: 18px;
+    margin-top: 10px;
 }
 
-.muted {
-  opacity: 0.6 !important;
+.page {
+    max-width: 700px;
+    margin: 0 auto;
 }
 
-footer {
-  text-align: center;
-  opacity: 0.35;
-  font-size: 12px;
-  padding: 18px;
+/* ===== الهيدر ===== */
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-@media (max-width: 560px) {
-  .page {
-    padding: 10px;
-  }
-  .card {
-    padding: 18px;
-  }
-  .q {
-    font-size: 19px;
-  }
-  .timer {
+.logo {
+    font-size: 40px;
+    line-height: 1;
+}
+
+.brand h1 {
+    font-size: 26px;
+    margin: 0;
+    color: #ffd93d;
+}
+
+.brand p {
+    font-size: 14px;
+    opacity: 0.7;
+    margin: 2px 0 0;
+}
+
+/* ===== البطاقات ===== */
+.card {
+    background: rgba(255, 255, 255, 0.06);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    padding: 30px 24px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(10px);
+}
+
+.card.center {
+    text-align: center;
+}
+
+.question-card {
+    padding: 20px 18px;
+}
+
+/* ===== شاشة البداية ===== */
+.emoji-big {
+    font-size: 72px;
+    margin-bottom: 10px;
+}
+
+.badge {
+    display: inline-block;
+    background: rgba(255, 215, 0, 0.15);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: #ffd93d;
+    padding: 8px 20px;
+    border-radius: 50px;
+    font-size: 16px;
+}
+
+.card h2 {
+    font-size: 28px;
+    margin: 12px 0 6px;
+}
+
+.card p {
+    font-size: 18px;
+    opacity: 0.8;
+    line-height: 1.6;
+}
+
+.notice {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 16px;
+    padding: 14px;
+    margin: 16px 0;
+    font-size: 18px;
+}
+
+/* ===== المدخلات ===== */
+input {
+    width: 100%;
+    padding: 16px 20px;
+    border-radius: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    background: rgba(0, 0, 0, 0.3);
+    color: #fff;
+    font-size: 22px;
+    outline: none;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+input:focus {
+    border-color: #ffd93d;
+    box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.15);
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* ===== الأزرار ===== */
+button {
+    border: 0;
+    border-radius: 16px;
+    padding: 16px 24px;
     font-size: 20px;
-  }
-  .examTop {
-    align-items: flex-start;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+button:hover:not(:disabled) {
+    transform: scale(1.02);
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn-start {
+    width: 100%;
+    margin-top: 14px;
+    background: linear-gradient(135deg, #ffd93d, #f6a832);
+    color: #1a1a2e;
+    font-size: 24px;
+    padding: 18px;
+    border-radius: 20px;
+    box-shadow: 0 8px 30px rgba(255, 215, 0, 0.25);
+}
+
+.btn-start:hover:not(:disabled) {
+    box-shadow: 0 10px 40px rgba(255, 215, 0, 0.4);
+}
+
+.btn-nav {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #fff;
+    padding: 14px 28px;
+    font-size: 18px;
+    border-radius: 14px;
+    flex: 1;
+}
+
+.btn-nav:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.btn-submit {
+    width: 100%;
+    margin-top: 10px;
+    background: linear-gradient(135deg, #00b894, #00a381);
+    color: #fff;
+    font-size: 22px;
+    padding: 16px;
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 184, 148, 0.25);
+}
+
+.btn-submit:hover:not(:disabled) {
+    box-shadow: 0 10px 40px rgba(0, 184, 148, 0.4);
+}
+
+/* ===== شريط الامتحان ===== */
+.exam-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 12px 18px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.student-name {
+    font-size: 18px;
+    opacity: 0.9;
+}
+
+.student-name span {
+    color: #ffd93d;
+    font-weight: 700;
+}
+
+.timer-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px 16px;
+    border-radius: 12px;
+}
+
+.timer-icon {
+    font-size: 22px;
+}
+
+.timer {
+    font-size: 28px;
+    font-weight: 900;
+    color: #ffd93d;
+    min-width: 70px;
+    text-align: center;
+}
+
+.timer.warning {
+    color: #ff6b6b;
+    animation: pulse 0.8s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* ===== السؤال ===== */
+.progress {
+    margin-bottom: 16px;
+}
+
+.progress-bar {
+    height: 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+.progress-bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #ffd93d, #f6a832);
+    border-radius: 20px;
+    transition: width 0.4s ease;
+}
+
+.progress-text {
+    font-size: 16px;
+    opacity: 0.7;
+    margin-top: 6px;
+    text-align: center;
+}
+
+.question-text {
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1.6;
+    margin-bottom: 18px;
+    padding: 10px 0;
+    color: #fff;
+}
+
+/* ===== الخيارات ===== */
+.options {
+    display: flex;
     flex-direction: column;
     gap: 10px;
-  }
-  .brand h1 {
-    font-size: 17px;
-  }
+}
+
+.option {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 2px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: right;
+    font-weight: 600;
+}
+
+.option:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.option.selected {
+    background: rgba(255, 215, 0, 0.15);
+    border-color: #ffd93d;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.08);
+}
+
+.option .letter {
+    font-weight: 700;
+    color: #ffd93d;
+    margin-left: 12px;
+    font-size: 22px;
+    min-width: 30px;
+}
+
+/* ===== أزرار التنقل ===== */
+.nav-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.nav-buttons .btn-nav {
+    flex: 1;
+    min-width: 100px;
+}
+
+.nav-buttons .btn-submit {
+    width: 100%;
+}
+
+/* ===== النتيجة ===== */
+.result-icon {
+    font-size: 80px;
+    margin-bottom: 10px;
+}
+
+#score {
+    font-size: 32px;
+    font-weight: 900;
+    margin: 10px 0;
+}
+
+#score .score-number {
+    color: #ffd93d;
+    font-size: 48px;
+}
+
+/* ===== الفوتر ===== */
+footer {
+    text-align: center;
+    opacity: 0.4;
+    font-size: 14px;
+    padding: 20px;
+    margin-top: 10px;
+}
+
+/* ===== التحميل ===== */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.08);
+    border-top-color: #ffd93d;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 10px auto;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ===== الشاشات الصغيرة ===== */
+@media (max-width: 560px) {
+    .brand {
+        padding: 12px 16px;
+    }
+    .brand h1 {
+        font-size: 20px;
+    }
+    .logo {
+        font-size: 30px;
+    }
+    .card {
+        padding: 18px 14px;
+    }
+    .question-text {
+        font-size: 22px;
+    }
+    .option {
+        font-size: 17px;
+        padding: 14px 16px;
+    }
+    .timer {
+        font-size: 24px;
+    }
+    .btn-start {
+        font-size: 20px;
+    }
+    .btn-nav {
+        font-size: 16px;
+        padding: 12px 16px;
+    }
+    .card h2 {
+        font-size: 22px;
+    }
 }

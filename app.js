@@ -1,5 +1,5 @@
 // ============================================================
-// app.js
+// app.js - نسخة الطالب (المنطق نفسه)
 // ============================================================
 
 console.log('🚀 app.js بدأ التحميل');
@@ -16,6 +16,7 @@ try {
     console.error('❌ خطأ في تهيئة Supabase:', error);
 }
 
+// ===== عناصر الصفحة =====
 const loadingSection = document.getElementById('loading');
 const startSection = document.getElementById('start');
 const examSection = document.getElementById('exam');
@@ -39,6 +40,7 @@ const submitBtn = document.getElementById('submit');
 
 const scoreDiv = document.getElementById('score');
 
+// ===== حالة التطبيق =====
 const STATE = {
     exam: null,
     attemptId: null,
@@ -51,15 +53,14 @@ const STATE = {
     studentName: ''
 };
 
+// ===== دوال مساعدة =====
 function show(el) { if (el) el.classList.remove('hidden'); }
 function hide(el) { if (el) el.classList.add('hidden'); }
 
 function showError(msg) {
     if (errorMsg) {
         errorMsg.textContent = msg;
-        errorMsg.style.color = '#ff7187';
     }
-    console.error('❌ خطأ:', msg);
 }
 
 function clearError() {
@@ -78,6 +79,7 @@ function escapeHTML(text) {
     });
 }
 
+// ===== جلب الامتحان =====
 async function loadExam() {
     console.log('🔍 بدء تحميل الامتحان...');
 
@@ -87,7 +89,7 @@ async function loadExam() {
     console.log('📌 كود الامتحان:', examCode);
 
     if (!examCode) {
-        showError('❌ رابط الامتحان غير صحيح - مفيش كود امتحان');
+        showError('❌ رابط الامتحان غير صحيح');
         hide(loadingSection);
         show(startSection);
         if (examTitle) examTitle.textContent = '⚠️ رابط غير صحيح';
@@ -114,7 +116,6 @@ async function loadExam() {
         });
 
         console.log('📊 البيانات المستلمة:', data);
-        console.log('❌ الخطأ:', error);
 
         if (error) {
             throw new Error(error.message);
@@ -128,9 +129,9 @@ async function loadExam() {
 
         console.log('✅ تم تحميل الامتحان:', STATE.exam.title);
 
-        if (examTitle) examTitle.textContent = STATE.exam.title || 'امتحان';
+        if (examTitle) examTitle.textContent = '📖 ' + (STATE.exam.title || 'امتحان');
         if (examInfo) {
-            examInfo.textContent = `${STATE.exam.question_count || 0} سؤال • ${STATE.exam.duration_minutes || 0} دقيقة`;
+            examInfo.textContent = `📝 ${STATE.exam.question_count || 0} أسئلة • ⏱️ ${STATE.exam.duration_minutes || 0} دقائق`;
         }
 
         hide(loadingSection);
@@ -148,6 +149,7 @@ async function loadExam() {
     }
 }
 
+// ===== بدء الامتحان =====
 async function startExam() {
     const name = studentNameInput ? studentNameInput.value.trim() : '';
 
@@ -173,7 +175,6 @@ async function startExam() {
         });
 
         console.log('📊 بيانات البدء:', data);
-        console.log('❌ الخطأ:', error);
 
         if (error) {
             throw new Error(error.message);
@@ -199,8 +200,10 @@ async function startExam() {
         hide(startSection);
         show(examSection);
 
-        if (liveTitle) liveTitle.textContent = STATE.exam.title || 'امتحان';
-        if (studentLabel) studentLabel.textContent = `👤 الطالب: ${name}`;
+        if (studentLabel) {
+            const span = studentLabel.querySelector('span');
+            if (span) span.textContent = name;
+        }
 
         renderQuestion();
 
@@ -218,6 +221,7 @@ async function startExam() {
     }
 }
 
+// ===== عرض السؤال =====
 function renderQuestion() {
     const q = STATE.questions[STATE.current];
     if (!q) return;
@@ -228,15 +232,15 @@ function renderQuestion() {
         qmeta.textContent = `📌 السؤال ${STATE.current + 1} من ${STATE.questions.length}`;
     }
 
-    let html = `<div class="q">${escapeHTML(q.text)}</div>`;
-    html += '<div class="options-list">';
+    let html = `<div class="question-text">${escapeHTML(q.text)}</div>`;
+    html += '<div class="options">';
 
     const letters = ['أ', 'ب', 'ج', 'د'];
     q.options.forEach((option, index) => {
         const selected = STATE.answers[STATE.current] === index ? 'selected' : '';
         html += `
             <button class="option ${selected}" data-index="${index}">
-                <span class="option-label">${letters[index]}.</span>
+                <span class="letter">${letters[index]}.</span>
                 ${escapeHTML(option)}
             </button>
         `;
@@ -263,6 +267,7 @@ function renderQuestion() {
     if (submitBtn) submitBtn.classList.toggle('hidden', !isLast);
 }
 
+// ===== المؤقت =====
 function updateTimer() {
     if (STATE.submitted) return;
 
@@ -277,13 +282,11 @@ function updateTimer() {
 
     if (seconds <= 60 && seconds > 0) {
         if (timerDisplay) {
-            timerDisplay.style.color = '#ff7187';
-            timerDisplay.style.animation = 'pulse 0.5s ease-in-out infinite';
+            timerDisplay.classList.add('warning');
         }
     } else {
         if (timerDisplay) {
-            timerDisplay.style.color = '';
-            timerDisplay.style.animation = '';
+            timerDisplay.classList.remove('warning');
         }
     }
 
@@ -293,6 +296,7 @@ function updateTimer() {
     }
 }
 
+// ===== التنقل =====
 if (prevBtn) {
     prevBtn.addEventListener('click', function() {
         if (STATE.current > 0 && !STATE.submitted) {
@@ -311,6 +315,7 @@ if (nextBtn) {
     });
 }
 
+// ===== تسليم الامتحان =====
 async function submitExam(auto = false) {
     if (STATE.submitted) return;
     STATE.submitted = true;
@@ -348,8 +353,8 @@ async function submitExam(auto = false) {
 
         const message = auto ? '⏰ انتهى الوقت وتم التسليم تلقائيًا.' : '🎉 تم تسليم الامتحان بنجاح.';
 
-        let emoji = '🎉';
-        let resultText = 'ممتاز! 🌟';
+        let emoji = '🌟';
+        let resultText = 'ممتاز!';
         if (data.score < data.total * 0.5) {
             emoji = '📚';
             resultText = 'حاول مرة أخرى';
@@ -360,12 +365,12 @@ async function submitExam(auto = false) {
 
         if (scoreDiv) {
             scoreDiv.innerHTML = `
-                <div style="font-size: 48px; margin: 10px 0;">${emoji}</div>
-                <div style="font-size: 32px; font-weight: 900; margin: 15px 0;">
-                    <span style="color: #5ce1ff;">${data.score}</span> / ${data.total}
+                <div style="font-size: 60px; margin: 10px 0;">${emoji}</div>
+                <div style="font-size: 38px; font-weight: 900; margin: 15px 0;">
+                    <span class="score-number">${data.score}</span> / ${data.total}
                 </div>
-                <div style="font-size: 18px; margin: 10px 0;">${resultText}</div>
-                <p style="margin-top: 20px; opacity: 0.7;">${message}</p>
+                <div style="font-size: 24px; margin: 10px 0;">${resultText}</div>
+                <p style="margin-top: 20px; opacity: 0.7; font-size:16px;">${message}</p>
             `;
         }
 
@@ -373,9 +378,9 @@ async function submitExam(auto = false) {
         console.error('❌ خطأ:', error);
         if (scoreDiv) {
             scoreDiv.innerHTML = `
-                <div style="font-size: 48px;">❌</div>
+                <div style="font-size: 60px;">❌</div>
                 <p class="error">حدث خطأ أثناء التسليم: ${escapeHTML(error.message)}</p>
-                <button onclick="location.reload()" style="margin-top:20px;padding:12px 30px;background:#2588ff;border:0;border-radius:12px;color:#fff;font-weight:700;cursor:pointer;">
+                <button onclick="location.reload()" style="margin-top:20px;padding:14px 30px;background:#ffd93d;border:0;border-radius:16px;color:#1a1a2e;font-weight:700;font-size:18px;cursor:pointer;">
                     🔄 إعادة المحاولة
                 </button>
             `;
@@ -383,6 +388,7 @@ async function submitExam(auto = false) {
     }
 }
 
+// ===== ربط الأزرار =====
 if (startBtn) {
     startBtn.addEventListener('click', startExam);
 }
@@ -399,6 +405,7 @@ if (submitBtn) {
     });
 }
 
+// ===== بدء التطبيق =====
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM تحمّل');
 

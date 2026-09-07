@@ -1,75 +1,109 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>امتحان أستاذ حسن عيسى</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>امتحان أستاذ حسن عيسى</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="page">
-    <header class="brand">
-      <div class="logo">ح</div>
-      <div>
-        <h1>أستاذ حسن عيسى</h1>
-        <p>منصة الامتحانات • اللغة العربية</p>
-      </div>
-    </header>
+    <div class="page">
 
-    <main>
-      <!-- شاشة التحميل -->
-      <section id="loading" class="card center">
-        <div class="spinner"></div>
-        <h2>⏳ جاري تحميل الامتحان...</h2>
-        <p style="opacity:0.5;font-size:13px;">يرجى الانتظار...</p>
-      </section>
+        <!-- ===== الهيدر ===== -->
+        <header class="brand">
+            <div class="logo">🌟</div>
+            <div>
+                <h1>📚 امتحاني</h1>
+                <p>أستاذ حسن عيسى</p>
+            </div>
+        </header>
 
-      <!-- شاشة البداية -->
-      <section id="start" class="card center hidden">
-        <div class="book">📚</div>
-        <span class="badge">امتحان إلكتروني</span>
-        <h2 id="examTitle">امتحان اللغة العربية</h2>
-        <p id="examInfo"></p>
-        <div class="notice">✏️ اكتب اسمك كما تريد أن يظهر في النتيجة.</div>
-        <input id="studentName" maxlength="80" autocomplete="name" placeholder="اكتب اسمك هنا">
-        <button id="startBtn" disabled>🚀 ابدأ الامتحان</button>
-        <p id="error" class="error"></p>
-      </section>
+        <main>
 
-      <!-- شاشة الامتحان -->
-      <section id="exam" class="hidden">
-        <div class="examTop card">
-          <div>
-            <b id="liveTitle"></b>
-            <small id="studentLabel"></small>
-          </div>
-          <div class="timer" id="timer">⏱️ 00:00</div>
-        </div>
-        <div class="card">
-          <div class="progressLine"><span id="progress"></span></div>
-          <div class="qmeta" id="qmeta"></div>
-          <div id="question"></div>
-          <div class="nav">
-            <button id="prev" disabled>⬅️ السابق</button>
-            <button id="next">التالي ➡️</button>
-          </div>
-          <button id="submit" class="submit hidden">📤 تسليم الامتحان ✅</button>
-        </div>
-      </section>
+            <!-- ===== شاشة التحميل ===== -->
+            <section id="loading" class="card center">
+                <div class="spinner"></div>
+                <h2>⏳ جاري التحميل...</h2>
+                <p style="opacity:0.5;font-size:16px;">استنى شوية 🤗</p>
+            </section>
 
-      <!-- شاشة النتيجة -->
-      <section id="result" class="card center hidden">
-        <div class="trophy">🏆</div>
-        <h2>✅ تم تسليم الامتحان</h2>
-        <div id="score"></div>
-        <p class="muted">يمكنك إغلاق الصفحة الآن.</p>
-      </section>
-    </main>
+            <!-- ===== شاشة البداية ===== -->
+            <section id="start" class="card center hidden">
+                <div class="emoji-big">📝</div>
+                <span class="badge">امتحان جديد</span>
+                <h2 id="examTitle">📖 امتحان اللغة العربية</h2>
+                <p id="examInfo" style="font-size:18px;"></p>
+                
+                <div class="notice">
+                    ✏️ اكتب اسمك هنا 🧒
+                </div>
+                
+                <input id="studentName" maxlength="80" placeholder="👤 اكتب اسمك..." style="font-size:20px;text-align:center;">
+                
+                <button id="startBtn" disabled class="btn-start">🚀 ابدأ الامتحان</button>
+                
+                <p id="error" class="error"></p>
+            </section>
 
-    <footer>© أستاذ حسن عيسى</footer>
-  </div>
+            <!-- ===== شاشة الامتحان ===== -->
+            <section id="exam" class="hidden">
+                
+                <!-- ===== شريط المعلومات ===== -->
+                <div class="exam-top">
+                    <div>
+                        <div class="student-name" id="studentLabel">👤 الطالب: <span></span></div>
+                    </div>
+                    <div class="timer-box">
+                        <span class="timer-icon">⏱️</span>
+                        <span class="timer" id="timer">00:00</span>
+                    </div>
+                </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+                <!-- ===== السؤال ===== -->
+                <div class="card question-card">
+                    
+                    <!-- شريط التقدم -->
+                    <div class="progress">
+                        <div class="progress-bar">
+                            <span id="progress" style="width:0%;"></span>
+                        </div>
+                        <div class="progress-text" id="qmeta">السؤال 1 من 2</div>
+                    </div>
+
+                    <!-- السؤال -->
+                    <div id="question">
+                        <div class="question-text">❓ السؤال هنا</div>
+                        <div class="options">
+                            <button class="option">أ. الخيار الأول</button>
+                            <button class="option">ب. الخيار الثاني</button>
+                            <button class="option">ج. الخيار الثالث</button>
+                            <button class="option">د. الخيار الرابع</button>
+                        </div>
+                    </div>
+
+                    <!-- الأزرار -->
+                    <div class="nav-buttons">
+                        <button id="prev" class="btn-nav" disabled>⬅️ السابق</button>
+                        <button id="next" class="btn-nav">التالي ➡️</button>
+                        <button id="submit" class="btn-submit hidden">📤 سلم الامتحان</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== شاشة النتيجة ===== -->
+            <section id="result" class="card center hidden">
+                <div class="result-icon">🏆</div>
+                <h2>🎉 تم التسليم!</h2>
+                <div id="score" style="font-size:28px;"></div>
+                <p class="muted" style="font-size:16px;">أحسنت! 👏</p>
+            </section>
+
+        </main>
+
+        <footer>🌟 أستاذ حسن عيسى</footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
 </body>
 </html>
