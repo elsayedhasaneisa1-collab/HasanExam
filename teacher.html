@@ -1,975 +1,261 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
-
 <head>
-
   <meta charset="utf-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1"
-  >
-
-  <meta
-    name="theme-color"
-    content="#07111f"
-  >
-
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07111f">
   <title>لوحة أستاذ حسن عيسى</title>
-
-  <!-- CSS -->
   <link rel="stylesheet" href="teacher.css">
-
-  <!--
-    مهم:
-    التطبيق مخفي تمامًا قبل تسجيل الدخول
-  -->
+  
   <style>
+    /* ===== Login Override ===== */
     #app {
       display: none !important;
     }
-
+    
     body.authenticated #app {
       display: block !important;
     }
-
+    
     body.authenticated #login {
       display: none !important;
     }
+    
+    /* ===== Loading States ===== */
+    .loading-shimmer {
+      animation: shimmer 1.5s ease-in-out infinite;
+      background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.03) 75%);
+      background-size: 200% 100%;
+    }
+    
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+    
+    /* ===== Toast Notification ===== */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      padding: 15px 25px;
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 600;
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+    
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .toast.success {
+      background: linear-gradient(135deg, #0da66d, #0a8a5a);
+    }
+    
+    .toast.error {
+      background: linear-gradient(135deg, #ff5570, #d43a54);
+    }
+    
+    .toast.info {
+      background: linear-gradient(135deg, #2588ff, #1a6dd4);
+    }
   </style>
-
-
-<style>
-/* ===== Premium Mobile Teacher UI — visual only ===== */
-:root{
-  --ui-bg:#060b14;
-  --ui-panel:#0b1422;
-  --ui-panel2:#0e1929;
-  --ui-line:rgba(92,151,255,.16);
-  --ui-blue:#2687ff;
-  --ui-cyan:#38d9ff;
-  --ui-text:#f3f7ff;
-  --ui-muted:#91a0b5;
-  --ui-danger:#ff5570;
-  --ui-radius:16px;
-}
-*{box-sizing:border-box}
-html{overflow-x:hidden}
-body{
-  margin:0;
-  min-width:0;
-  overflow-x:hidden;
-  background:var(--ui-bg);
-}
-.teacher-page{
-  width:100%;
-  max-width:100%;
-  margin:0 auto;
-  padding:0 12px;
-}
-.app{
-  width:100%;
-  max-width:1100px;
-  margin:0 auto;
-}
-.topbar{
-  width:100%;
-  min-height:68px;
-  padding:12px 14px;
-  gap:12px;
-  border-radius:0 0 18px 18px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-}
-.brand{min-width:0;display:flex;align-items:center;gap:10px}
-.brand-logo,.teacher-logo{
-  flex:0 0 auto;
-  display:grid;
-  place-items:center;
-  border-radius:13px;
-}
-.brand-logo{width:42px;height:42px}
-.brand h1,.brand p{margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.brand h1{font-size:16px}
-.brand p{font-size:10px;margin-top:3px;color:var(--ui-muted)}
-.top-actions{flex:0 0 auto}
-.top-actions button{white-space:nowrap}
-
-.dashboard{
-  width:100%;
-  display:flex;
-  flex-direction:column;
-  gap:14px;
-  padding:14px 0 24px;
-}
-.card{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  padding:18px;
-  border-radius:var(--ui-radius);
-  overflow:hidden;
-}
-.card-header,.questions-title{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:12px;
-}
-.card-header>div,.questions-title>div{min-width:0}
-.card h2{font-size:18px;margin:0 0 5px}
-.card-header p,.questions-title p{font-size:11px;line-height:1.7;margin:0;color:var(--ui-muted)}
-.field{width:100%;min-width:0;margin-top:14px}
-.field label{display:block;margin-bottom:7px;font-size:12px;font-weight:800}
-.field input,
-.field textarea,
-.field select,
-#shareLink{
-  width:100%;
-  max-width:100%;
-  min-width:0;
-  height:45px;
-  padding:0 12px;
-  border-radius:11px;
-  font-size:13px;
-  outline:none;
-}
-.field small{display:block;font-size:9px;line-height:1.7;margin-top:5px;color:var(--ui-muted)}
-.primary-btn,.secondary-btn,.danger-btn{
-  min-height:44px;
-  border-radius:11px;
-  padding:10px 15px;
-  font-size:12px;
-  font-weight:900;
-  white-space:nowrap;
-  transition:.2s ease;
-}
-.primary-btn:hover:not(:disabled),
-.secondary-btn:hover:not(:disabled),
-.danger-btn:hover:not(:disabled){transform:translateY(-1px)}
-.create-actions{margin-top:18px}
-.create-actions button{width:100%}
-
-.questions-title{margin-top:20px}
-.questions-container{
-  width:100%;
-  min-width:0;
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  margin-top:12px;
-}
-.questions-container>*{min-width:0;max-width:100%}
-
-.exam-result-box{
-  width:100%;
-  max-width:100%;
-  overflow:hidden;
-  border-radius:13px;
-}
-.result-row{
-  min-width:0;
-  display:grid;
-  grid-template-columns:110px minmax(0,1fr);
-  align-items:center;
-  gap:10px;
-  padding:11px 12px;
-}
-.result-row span{font-size:11px;color:var(--ui-muted)}
-.result-row strong{font-size:13px;word-break:break-word}
-.result-row input{min-width:0}
-.result-actions{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:14px;
-}
-.result-actions button{width:100%}
-
-.results-tools{width:100%}
-.table-wrap{
-  width:100%;
-  max-width:100%;
-  overflow-x:auto;
-  -webkit-overflow-scrolling:touch;
-  margin-top:12px;
-  border-radius:12px;
-}
-.results-table{
-  width:100%;
-  min-width:650px;
-  border-collapse:collapse;
-}
-.results-table th,.results-table td{
-  padding:10px 9px;
-  font-size:11px;
-}
-.pdf-actions{
-  width:100%;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:14px;
-  padding-top:14px;
-  border-top:1px solid var(--ui-line);
-}
-.pdf-actions button{width:100%}
-.delete-warning{
-  grid-column:1/-1;
-  display:block;
-  font-size:9px;
-  line-height:1.7;
-  text-align:center;
-  color:var(--ui-muted);
-}
-.footer{
-  width:100%;
-  padding:18px 8px 25px;
-  text-align:center;
-}
-.footer p{font-size:10px;margin:4px 0}
-
-.modal{padding:12px}
-.modal-box{
-  width:min(100%,520px);
-  max-height:88vh;
-  overflow:auto;
-  border-radius:16px;
-  padding:18px;
-}
-
-/* Login stays compact on phones */
-.login-page{
-  width:100%;
-  min-height:100dvh;
-  display:grid;
-  place-items:center;
-  padding:16px 0;
-}
-.login-card{
-  width:min(100%,390px);
-  max-width:390px;
-  padding:22px 18px;
-  border-radius:18px;
-}
-.login-card input{max-width:100%}
-.login-card .primary-btn{width:100%;margin-top:8px}
-
-/* ===== Phones ===== */
-@media (max-width:600px){
-  .teacher-page{padding:0 8px}
-  .topbar{
-    min-height:62px;
-    padding:10px;
-    border-radius:0 0 15px 15px;
-  }
-  .brand-logo{width:38px;height:38px;border-radius:11px}
-  .brand h1{font-size:14px}
-  .brand p{font-size:9px}
-  .top-actions button{
-    min-height:38px;
-    padding:8px 10px;
-    font-size:10px;
-  }
-
-  .dashboard{gap:10px;padding:10px 0 18px}
-  .card{padding:14px;border-radius:14px}
-  .card h2{font-size:16px}
-  .card-header,.questions-title{
-    align-items:stretch;
-    flex-direction:column;
-    gap:10px;
-  }
-  .card-header .secondary-btn,
-  .questions-title .secondary-btn{
-    width:100%;
-  }
-  .field{margin-top:12px}
-  .field input,
-  .field textarea,
-  .field select,
-  #shareLink{
-    height:44px;
-    font-size:12px;
-  }
-
-  .result-row{
-    grid-template-columns:1fr;
-    gap:5px;
-  }
-  .result-row span{font-size:10px}
-  .result-row strong{font-size:12px}
-  .result-row input{height:42px}
-
-  .result-actions,.pdf-actions{
-    grid-template-columns:1fr;
-  }
-  .delete-warning{grid-column:auto}
-
-  .table-wrap{margin-left:0;margin-right:0}
-  .results-table{min-width:600px}
-
-  .success-icon{margin-top:2px}
-}
-
-/* Very small screens */
-@media (max-width:380px){
-  .teacher-page{padding:0 6px}
-  .card{padding:12px}
-  .brand h1{font-size:13px}
-  .top-actions button{font-size:9px;padding:7px 8px}
-  .primary-btn,.secondary-btn,.danger-btn{font-size:11px}
-}
-</style>
-
 </head>
-
-
 <body>
 
 <div class="teacher-page">
 
-
-  <!-- ==================================================
-       LOGIN
-  =================================================== -->
-
+  <!-- ===== LOGIN ===== -->
   <section id="login" class="login-page">
-
     <div class="login-card">
-
-      <div class="teacher-logo">
-        ح
-      </div>
-
-      <h1>
-        أستاذ حسن عيسى
-      </h1>
-
-      <p class="login-subtitle">
-        لوحة إدارة الامتحانات
-      </p>
-
-
+      <div class="teacher-logo">ح</div>
+      <h1>أستاذ حسن عيسى</h1>
+      <p class="login-subtitle">لوحة إدارة الامتحانات</p>
+      
       <div class="field">
-
-        <label for="username">
-          اسم المستخدم
-        </label>
-
-        <input
-          id="username"
-          type="text"
-          autocomplete="username"
-          placeholder="أدخل اسم المستخدم"
-        >
-
+        <label for="username">اسم المستخدم</label>
+        <input id="username" type="text" autocomplete="username" placeholder="أدخل اسم المستخدم">
       </div>
-
-
+      
       <div class="field">
-
-        <label for="password">
-          كلمة المرور
-        </label>
-
-        <input
-          id="password"
-          type="password"
-          autocomplete="current-password"
-          placeholder="أدخل كلمة المرور"
-        >
-
+        <label for="password">كلمة المرور</label>
+        <input id="password" type="password" autocomplete="current-password" placeholder="أدخل كلمة المرور">
       </div>
-
-
-      <button
-        id="loginBtn"
-        type="button"
-        class="primary-btn"
-      >
-        دخول 🔐
-      </button>
-
-
-      <p
-        id="loginError"
-        class="error"
-      ></p>
-
+      
+      <button id="loginBtn" type="button" class="primary-btn">دخول 🔐</button>
+      <p id="loginError" class="error"></p>
     </div>
-
   </section>
 
-
-
-  <!-- ==================================================
-       TEACHER APP
-  =================================================== -->
-
-  <main
-    id="app"
-    class="app hidden"
-    aria-hidden="true"
-  >
-
-
-    <!-- ================= HEADER ================= -->
-
+  <!-- ===== TEACHER APP ===== -->
+  <main id="app" class="app">
+    
+    <!-- Header -->
     <header class="topbar">
-
       <div class="brand">
-
-        <div class="brand-logo">
-          ح
-        </div>
-
+        <div class="brand-logo">ح</div>
         <div>
-
-          <h1>
-            أستاذ حسن عيسى
-          </h1>
-
-          <p>
-            لوحة إدارة الامتحانات
-          </p>
-
+          <h1>أستاذ حسن عيسى</h1>
+          <p>لوحة إدارة الامتحانات</p>
         </div>
-
       </div>
-
-
       <div class="top-actions">
-
-        <button
-          id="logoutBtn"
-          type="button"
-          class="danger-btn"
-        >
-          تسجيل الخروج
-        </button>
-
+        <button id="logoutBtn" type="button" class="danger-btn">تسجيل الخروج</button>
       </div>
-
     </header>
 
-
-
-    <!-- ==================================================
-         DASHBOARD
-    =================================================== -->
-
+    <!-- Dashboard -->
     <section class="dashboard">
-
-
-      <!-- ==================================================
-           CREATE EXAM
-      =================================================== -->
-
+      
+      <!-- Create Exam -->
       <div class="card">
-
         <div class="card-header">
-
           <div>
-
-            <h2>
-              إنشاء امتحان جديد 📝
-            </h2>
-
-            <p>
-              أنشئ امتحانًا وحدد مدة الحل ومدة إتاحة الرابط.
-            </p>
-
+            <h2>إنشاء امتحان جديد 📝</h2>
+            <p>أنشئ امتحانًا وحدد مدة الحل ومدة إتاحة الرابط.</p>
           </div>
-
         </div>
-
-
-
-        <!-- اسم الامتحان -->
-
+        
         <div class="field">
-
-          <label for="examTitleInput">
-            اسم الامتحان
-          </label>
-
-          <input
-            id="examTitleInput"
-            type="text"
-            maxlength="150"
-            autocomplete="off"
-            placeholder="مثال: امتحان اللغة العربية"
-          >
-
+          <label for="examTitleInput">اسم الامتحان</label>
+          <input id="examTitleInput" type="text" maxlength="150" placeholder="مثال: امتحان اللغة العربية">
         </div>
-
-
-
-        <!-- مدة الحل -->
-
-        <div class="field">
-
-          <label for="duration">
-            مدة حل الامتحان بالدقائق
-          </label>
-
-          <input
-            id="duration"
-            type="number"
-            min="1"
-            max="1440"
-            step="1"
-            value="30"
-            placeholder="30"
-          >
-
-          <small>
-            مثال: 30 دقيقة.
-          </small>
-
-        </div>
-
-
-
-        <!-- مدة الإتاحة -->
-
-        <div class="field">
-
-          <label for="availabilityDays">
-            مدة إتاحة الامتحان بالأيام
-          </label>
-
-          <input
-            id="availabilityDays"
-            type="number"
-            min="0.01"
-            max="365"
-            step="0.01"
-            value="1"
-            placeholder="1"
-          >
-
-          <small>
-            بعد انتهاء هذه المدة لن يستطيع طالب جديد فتح أو بدء الامتحان.
-          </small>
-
-        </div>
-
-
-
-        <!-- ==================================================
-             QUESTIONS
-        =================================================== -->
-
-        <div class="questions-title">
-
-          <div>
-
-            <h3>
-              أسئلة الامتحان
-            </h3>
-
-            <p>
-              أضف الأسئلة والاختيارات وحدد الإجابة الصحيحة.
-            </p>
-
-          </div>
-
-
-          <button
-            id="addQuestionBtn"
-            type="button"
-            class="secondary-btn"
-          >
-            + إضافة سؤال
-          </button>
-
-        </div>
-
-
-        <!-- هنا JavaScript هيضيف الأسئلة -->
-
-        <div
-          id="questionsContainer"
-          class="questions-container"
-        ></div>
-
-
-
-        <!-- إنشاء الامتحان -->
-
-        <div class="create-actions">
-
-          <button
-            id="createExamBtn"
-            type="button"
-            class="primary-btn"
-          >
-            إنشاء الامتحان 🚀
-          </button>
-
-        </div>
-
-
-        <p
-          id="createError"
-          class="error"
-        ></p>
-
-      </div>
-
-
-
-      <!-- ==================================================
-           CREATED EXAM
-      =================================================== -->
-
-      <div
-        id="createdExam"
-        class="card hidden"
-      >
-
-        <div class="success-icon">
-          ✅
-        </div>
-
-
-        <h2>
-          تم إنشاء الامتحان بنجاح
-        </h2>
-
-
-        <p>
-          الامتحان جاهز ويمكنك إرسال الرابط للطلاب.
-        </p>
-
-
-
-        <div class="exam-result-box">
-
-
-          <!-- الكود -->
-
-          <div class="result-row">
-
-            <span>
-              كود الامتحان
-            </span>
-
-            <strong id="createdCode">
-              —
-            </strong>
-
-          </div>
-
-
-
-          <!-- الرابط -->
-
-          <div class="result-row">
-
-            <span>
-              رابط الامتحان
-            </span>
-
-            <input
-              id="shareLink"
-              type="text"
-              readonly
-            >
-
-          </div>
-
-
-
-          <!-- انتهاء الإتاحة -->
-
-          <div class="result-row">
-
-            <span>
-              انتهاء الإتاحة
-            </span>
-
-            <strong id="shareExpiry">
-              —
-            </strong>
-
-          </div>
-
-
-        </div>
-
-
-
-        <div class="result-actions">
-
-
-          <button
-            id="copyLinkBtn"
-            type="button"
-            class="primary-btn"
-          >
-            📋 نسخ الرابط
-          </button>
-
-
-          <button
-            id="newExamBtn"
-            type="button"
-            class="secondary-btn"
-          >
-            إنشاء امتحان آخر
-          </button>
-
-
-        </div>
-
-      </div>
-
-
-
-      <!-- ==================================================
-           RESULTS
-      =================================================== -->
-
-      <div class="card">
-
-
-        <div class="card-header">
-
-          <div>
-
-            <h2>
-              نتائج الطلاب 📊
-            </h2>
-
-            <p>
-              عرض نتائج الطلاب والدرجات الخاصة بالامتحانات.
-            </p>
-
-          </div>
-
-
-          <button
-            id="loadResultsBtn"
-            type="button"
-            class="secondary-btn"
-          >
-            تحديث النتائج 🔄
-          </button>
-
-        </div>
-
-
-
-        <!-- البحث بالكود -->
-
-        <div class="results-tools">
-
+        
+        <div class="row">
           <div class="field">
-
-            <label for="resultsCode">
-              كود الامتحان
-            </label>
-
-            <input
-              id="resultsCode"
-              type="text"
-              maxlength="20"
-              autocomplete="off"
-              placeholder="اتركه فارغًا لعرض كل النتائج"
-            >
-
+            <label for="duration">مدة الحل (دقائق)</label>
+            <input id="duration" type="number" min="1" max="1440" value="30">
           </div>
-
+          
+          <div class="field">
+            <label for="availabilityDays">مدة الإتاحة (أيام)</label>
+            <input id="availabilityDays" type="number" min="0.01" max="365" step="0.01" value="1">
+          </div>
         </div>
-
-
-        <p
-          id="resultsError"
-          class="error"
-        ></p>
-
-
-
-        <!-- جدول النتائج -->
-
-        <div class="table-wrap">
-
-          <table class="results-table">
-
-            <thead>
-
-              <tr>
-
-                <th>
-                  الطالب
-                </th>
-
-                <th>
-                  الامتحان
-                </th>
-
-                <th>
-                  الدرجة
-                </th>
-
-                <th>
-                  النتيجة
-                </th>
-
-                <th>
-                  وقت التسليم
-                </th>
-
-              </tr>
-
-            </thead>
-
-
-            <tbody id="resultsBody">
-
-              <tr>
-
-                <td
-                  colspan="5"
-                  class="empty"
-                >
-                  لا توجد نتائج حتى الآن.
-                </td>
-
-              </tr>
-
-            </tbody>
-
-          </table>
-
+        
+        <!-- Questions -->
+        <div class="questions-title">
+          <div>
+            <h3>أسئلة الامتحان</h3>
+            <p>أضف الأسئلة والاختيارات وحدد الإجابة الصحيحة.</p>
+          </div>
+          <button id="addQuestionBtn" type="button" class="secondary-btn">+ إضافة سؤال</button>
         </div>
-
-
-
-        <!-- PDF -->
-
-        <div class="pdf-actions">
-
-          <button
-            id="downloadPdfBtn"
-            type="button"
-            class="primary-btn"
-          >
-            📄 تنزيل النتائج PDF
-          </button>
-
-          <button
-            id="deleteExamBtn"
-            type="button"
-            class="danger-btn"
-            disabled
-            title="يجب تنزيل PDF أولًا قبل الحذف"
-          >
-            🗑️ حذف الامتحان ونتائجه
-          </button>
-
-          <small class="delete-warning">
-            ⚠️ لا يمكن الحذف إلا بعد تنزيل ملف PDF، والحذف نهائي ولا يمكن التراجع عنه.
-          </small>
-
+        
+        <div id="questionsContainer" class="questions-container"></div>
+        
+        <div class="create-actions">
+          <button id="createExamBtn" type="button" class="primary-btn">إنشاء الامتحان 🚀</button>
         </div>
-
-
+        
+        <p id="createError" class="error"></p>
       </div>
-
-
+      
+      <!-- Created Exam -->
+      <div id="createdExam" class="card hidden">
+        <div class="success-icon">✅</div>
+        <h2>تم إنشاء الامتحان بنجاح</h2>
+        <p>الامتحان جاهز ويمكنك إرسال الرابط للطلاب.</p>
+        
+        <div class="exam-result-box">
+          <div class="result-row">
+            <span>كود الامتحان</span>
+            <strong id="createdCode">—</strong>
+          </div>
+          <div class="result-row">
+            <span>رابط الامتحان</span>
+            <input id="shareLink" type="text" readonly>
+          </div>
+          <div class="result-row">
+            <span>انتهاء الإتاحة</span>
+            <strong id="shareExpiry">—</strong>
+          </div>
+        </div>
+        
+        <div class="result-actions">
+          <button id="copyLinkBtn" type="button" class="primary-btn">📋 نسخ الرابط</button>
+          <button id="newExamBtn" type="button" class="secondary-btn">إنشاء امتحان آخر</button>
+        </div>
+      </div>
+      
+      <!-- Results -->
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <h2>نتائج الطلاب 📊</h2>
+            <p>عرض نتائج الطلاب والدرجات الخاصة بالامتحانات.</p>
+          </div>
+          <button id="loadResultsBtn" type="button" class="secondary-btn">تحديث النتائج 🔄</button>
+        </div>
+        
+        <div class="field">
+          <label for="resultsCode">كود الامتحان</label>
+          <input id="resultsCode" type="text" maxlength="20" placeholder="اتركه فارغًا لعرض كل النتائج">
+        </div>
+        
+        <p id="resultsError" class="error"></p>
+        
+        <div class="table-wrap">
+          <table class="results-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>الطالب</th>
+                <th>الدرجة</th>
+                <th>وقت التسليم</th>
+                <th>الحالة</th>
+                <th>التفاصيل</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody">
+              <tr>
+                <td colspan="6" class="empty">لا توجد نتائج حتى الآن.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="pdf-actions">
+          <button id="downloadPdfBtn" type="button" class="primary-btn" disabled>📄 تنزيل النتائج PDF</button>
+          <button id="deleteExamBtn" type="button" class="danger-btn" disabled>🗑️ حذف الامتحان ونتائجه</button>
+          <small class="delete-warning">⚠️ لا يمكن الحذف إلا بعد تنزيل ملف PDF، والحذف نهائي ولا يمكن التراجع عنه.</small>
+        </div>
+      </div>
+      
     </section>
-
-
-
-    <!-- ==================================================
-         FOOTER
-    =================================================== -->
-
+    
+    <!-- Footer -->
     <footer class="footer">
-
-      <p>
-        © أستاذ حسن عيسى — جميع الحقوق محفوظة
-      </p>
-
-      <p>
-        منصة إدارة الامتحانات الإلكترونية
-      </p>
-
+      <p>© أستاذ حسن عيسى — جميع الحقوق محفوظة</p>
+      <p>منصة إدارة الامتحانات الإلكترونية</p>
     </footer>
-
-
+    
   </main>
-
-
-
-  <!-- ==================================================
-       MODAL
-  =================================================== -->
-
-  <div
-    id="detailsModal"
-    class="modal hidden"
-    aria-hidden="true"
-  >
-
+  
+  <!-- ===== MODAL ===== -->
+  <div id="detailsModal" class="modal hidden">
     <div class="modal-box">
-
-
-      <button
-        id="closeModalBtn"
-        type="button"
-        class="modal-close"
-        aria-label="إغلاق"
-      >
-        ×
-      </button>
-
-
-      <h2>
-        تفاصيل النتيجة
-      </h2>
-
-
+      <button id="closeModalBtn" type="button" class="modal-close">×</button>
+      <h2>تفاصيل النتيجة</h2>
       <div id="modalContent"></div>
-
-
     </div>
-
   </div>
-
-
-
-  <!-- ==================================================
-       PDF LIBRARIES
-  =================================================== -->
-
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
-  ></script>
-
-
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
-  ></script>
-
-
-
-  <!-- Supabase -->
+  
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+  
+  <!-- ===== LIBRARIES ===== -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-  <!-- ==================================================
-       TEACHER JAVASCRIPT
-  =================================================== -->
-
   <script src="teacher.js"></script>
-
-
+  
 </div>
-
 </body>
 </html>
