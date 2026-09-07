@@ -49,6 +49,22 @@ function esc(value) {
 
 
 /* =====================================================
+   ENABLE TEACHER APP
+===================================================== */
+
+function enableTeacherApp() {
+  const app = $("app");
+
+  if (app) {
+    app.removeAttribute("inert");
+    app.setAttribute("aria-hidden", "false");
+  }
+
+  document.body.classList.add("authenticated");
+}
+
+
+/* =====================================================
    LOGIN
 ===================================================== */
 
@@ -71,6 +87,7 @@ if ($("password")) {
     }
   });
 }
+
 
 async function teacherLogin() {
 
@@ -131,9 +148,8 @@ async function teacherLogin() {
   hide("login");
   show("app");
 
-  document.body.classList.add(
-    "authenticated"
-  );
+  /* إصلاح مشكلة inert */
+  enableTeacherApp();
 
   loadSavedExam();
 }
@@ -171,9 +187,8 @@ window.addEventListener(
       hide("login");
       show("app");
 
-      document.body.classList.add(
-        "authenticated"
-      );
+      /* إصلاح مشكلة inert في الدخول التلقائي */
+      enableTeacherApp();
 
       loadSavedExam();
     }
@@ -1500,7 +1515,9 @@ if ($("deleteExamBtn")) {
   $("deleteExamBtn").onclick = deleteExam;
 }
 
+
 async function deleteExam() {
+
   const code =
     lastResultsCode ||
     $("resultsCode")?.value.trim() ||
@@ -1509,88 +1526,173 @@ async function deleteExam() {
   const errorBox = $("resultsError");
 
   if (!code) {
-    if (errorBox) errorBox.textContent = "اكتب كود الامتحان أولًا.";
+    if (errorBox)
+      errorBox.textContent =
+        "اكتب كود الامتحان أولًا.";
+
     return;
   }
 
+
   if (pdfDownloadedForCode !== code) {
+
     if (errorBox) {
       errorBox.textContent =
         "يجب تنزيل النتائج PDF أولًا قبل حذف الامتحان.";
     }
+
     return;
   }
+
 
   if (!confirm(
     `تحذير ⚠️\n\nسيتم حذف الامتحان (${code}) وجميع نتائجه وإجابات الطلاب نهائيًا.\n\nتأكد أنك احتفظت بملف PDF.\n\nهل تريد المتابعة؟`
   )) return;
 
+
   const typedCode = prompt(
     `للتأكيد النهائي، اكتب كود الامتحان:\n${code}`
   );
 
+
   if (typedCode === null) return;
 
-  if (typedCode.trim().toUpperCase() !== code.toUpperCase()) {
-    alert("كود الامتحان غير مطابق. لم يتم حذف أي شيء.");
+
+  if (
+    typedCode.trim().toUpperCase() !==
+    code.toUpperCase()
+  ) {
+
+    alert(
+      "كود الامتحان غير مطابق. لم يتم حذف أي شيء."
+    );
+
     return;
   }
 
-  const button = $("deleteExamBtn");
-  const oldText = button?.textContent || "🗑️ حذف الامتحان ونتائجه";
+
+  const button =
+    $("deleteExamBtn");
+
+  const oldText =
+    button?.textContent ||
+    "🗑️ حذف الامتحان ونتائجه";
+
 
   if (button) {
     button.disabled = true;
-    button.textContent = "جاري حذف الامتحان...";
+    button.textContent =
+      "جاري حذف الامتحان...";
   }
 
-  if (errorBox) errorBox.textContent = "";
+
+  if (errorBox)
+    errorBox.textContent = "";
+
 
   try {
-    const { data, error } = await client.rpc(
+
+    const {
+      data,
+      error
+    } = await client.rpc(
       "delete_public_exam",
       {
-        p_code: code,
-        p_teacher_username: teacherUsername,
-        p_teacher_password: teacherPassword
+        p_code:
+          code,
+
+        p_teacher_username:
+          teacherUsername,
+
+        p_teacher_password:
+          teacherPassword
       }
     );
 
+
     if (error) {
-      console.error("DELETE EXAM ERROR:", error);
-      throw new Error(error.message || "تعذر حذف الامتحان.");
+
+      console.error(
+        "DELETE EXAM ERROR:",
+        error
+      );
+
+      throw new Error(
+        error.message ||
+        "تعذر حذف الامتحان."
+      );
     }
 
-    if (!data || data.success !== true) {
-      throw new Error("لم يتم حذف الامتحان.");
+
+    if (
+      !data ||
+      data.success !== true
+    ) {
+
+      throw new Error(
+        "لم يتم حذف الامتحان."
+      );
     }
+
 
     lastResults = [];
     lastResultsCode = "";
     pdfDownloadedForCode = "";
+
     renderResults([]);
 
-    if ($("resultsCode")) $("resultsCode").value = "";
-    if ($("downloadPdfBtn")) $("downloadPdfBtn").disabled = true;
-    if ($("deleteExamBtn")) $("deleteExamBtn").disabled = true;
 
-    if (localStorage.getItem("hasan_last_exam_code") === code) {
-      localStorage.removeItem("hasan_last_exam_code");
+    if ($("resultsCode"))
+      $("resultsCode").value = "";
+
+
+    if ($("downloadPdfBtn"))
+      $("downloadPdfBtn").disabled =
+        true;
+
+
+    if ($("deleteExamBtn"))
+      $("deleteExamBtn").disabled =
+        true;
+
+
+    if (
+      localStorage.getItem(
+        "hasan_last_exam_code"
+      ) === code
+    ) {
+
+      localStorage.removeItem(
+        "hasan_last_exam_code"
+      );
+
     }
+
 
     hide("createdExam");
-    alert("تم حذف الامتحان وجميع نتائجه بنجاح ✅");
+
+    alert(
+      "تم حذف الامتحان وجميع نتائجه بنجاح ✅"
+    );
+
 
   } catch (err) {
+
     console.error(err);
+
     if (errorBox) {
       errorBox.textContent =
-        err.message || "حدث خطأ أثناء حذف الامتحان.";
+        err.message ||
+        "حدث خطأ أثناء حذف الامتحان.";
     }
+
+
     if (button) {
       button.disabled = false;
-      button.textContent = oldText;
+      button.textContent =
+        oldText;
     }
+
   }
 }
 
