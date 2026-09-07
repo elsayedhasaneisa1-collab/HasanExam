@@ -1,745 +1,363 @@
-const SUPABASE_URL =
-    "https://zvvfjmadziyuwutdresz.supabase.co";
+const SUPABASE_URL = "https://zvvfjmadziyuwutdresz.supabase.co";
+const SUPABASE_KEY = "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc";
 
-const SUPABASE_KEY =
-    "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc";
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-const client =
-    supabase.createClient(
-        SUPABASE_URL,
-        SUPABASE_KEY
-    );
-
-const $ =
-    id =>
-        document.getElementById(id);
-
+const $ = (id) => document.getElementById(id);
 
 let exam = null;
 let attemptId = null;
 let questions = [];
 let answers = [];
 let current = 0;
-
 let endAt = 0;
 let timerId = null;
-
 let submitted = false;
 
-
-/* =========================================================
-   INIT
-========================================================= */
-
 async function init() {
+  const code = new URLSearchParams(location.search).get("exam");
 
-    const code =
-        new URLSearchParams(
-            location.search
-        ).get("exam");
+  if (!code) {
+    return fail("رابط الامتحان غير صحيح.");
+  }
 
+  $("loading").classList.remove("hidden");
+  $("start").classList.add("hidden");
 
-    if (!code) {
-
-        return fail(
-            "رابط الامتحان غير صحيح."
-        );
-
+  const { data, error } = await client.rpc(
+    "get_public_exam_with_expiry",
+    {
+      p_code: code
     }
+  );
 
+  if (error) {
+    console.error(error);
+    return fail("الامتحان غير موجود أو تم إغلاقه.");
+  }
 
-    try {
-
-        const { data, error } =
-            await client.rpc(
-                "get_public_exam_with_expiry",
-                {
-                    p_code: code
-                }
-            );
-
-
-        if (error) {
-
-            throw error;
-
-        }
-
-
-        if (!data || !data.exam) {
-
-            throw new Error(
-                "الامتحان غير موجود."
-            );
-
-        }
-
-
-        exam =
-            data.exam;
-
-
-        $("examTitle")
-            .textContent =
-                exam.title;
-
-
-        $("examInfo")
-            .textContent =
-                `${exam.question_count} سؤال • الوقت ${exam.duration_minutes} دقيقة`;
-
-
-        if (data.expires_at) {
-
-            const expiry =
-                new Date(
-                    data.expires_at
-                );
-
-
-            const notice =
-                document.createElement(
-                    "div"
-                );
-
-
-            notice.className =
-                "notice";
-
-
-            notice.textContent =
-                `⏰ متاح حتى ${expiry.toLocaleString("ar-EG")}`;
-
-
-            $("examInfo")
-                .after(notice);
-        }
-
-
-        $("loading")
-            .classList
-            .add("hidden");
-
-
-        $("start")
-            .classList
-            .remove("hidden");
-
-
-        $("startBtn")
-            .disabled = false;
-
-    } catch (error) {
-
-        console.error(error);
-
-        fail(
-            cleanError(
-                error.message
-            )
-        );
-
+  /*
+    الدالة الجديدة ترجع:
+    {
+      exam: {...},
+      expires_at: "..."
     }
+  */
+
+  if (!data || !data.exam) {
+    return fail("الامتحان غير موجود أو انتهت صلاحيته.");
+  }
+
+  exam = data.exam;
+
+  $("examTitle").textContent = exam.title;
+
+  $("examInfo").textContent =
+    `${exam.question_count} سؤال • الوقت ${exam.duration_minutes} دقيقة`;
+
+  $("loading").classList.add("hidden");
+  $("start").classList.remove("hidden");
+  $("startBtn").disabled = false;
 }
-
-
-/* =========================================================
-   FAIL
-========================================================= */
 
 function fail(message) {
+  $("loading").classList.add("hidden");
+  $("start").classList.remove("hidden");
 
-    $("loading")
-        .classList
-        .add("hidden");
+  $("examTitle").textContent = "تعذر فتح الامتحان";
+  $("examInfo").textContent = message;
 
-
-    $("start")
-        .classList
-        .remove("hidden");
-
-
-    $("examTitle")
-        .textContent =
-            "تعذر فتح الامتحان";
-
-
-    $("examInfo")
-        .textContent =
-            message;
-
-
-    $("startBtn")
-        .disabled = true;
-
+  $("startBtn").disabled = true;
 }
 
+$("startBtn").onclick = startExam;
 
-/* =========================================================
-   START
-========================================================= */
-
-$("startBtn")
-    .onclick =
-        startExam;
-
-
-$("studentName")
-    .addEventListener(
-        "keydown",
-        event => {
-
-            if (
-                event.key === "Enter"
-            ) {
-
-                startExam();
-
-            }
-
-        }
-    );
-
+$("studentName").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    startExam();
+  }
+});
 
 async function startExam() {
+  const name = $("studentName").value.trim();
 
-    const name =
-        $("studentName")
-            .value
-            .trim();
+  if (name.length < 2) {
+    $("error").textContent = "اكتب اسمك أولًا 😊";
+    return;
+  }
 
+  if (!exam || !exam.code) {
+    $("error").textContent = "تعذر العثور على بيانات الامتحان.";
+    return;
+  }
 
-    if (name.length < 2) {
+  $("startBtn").disabled = true;
+  $("error").textContent = "جاري بدء الامتحان...";
 
-        $("error")
-            .textContent =
-                "اكتب اسمك أولًا 😊";
-
-        return;
-
+  const { data, error } = await client.rpc(
+    "start_public_attempt_with_expiry",
+    {
+      p_code: exam.code,
+      p_student_name: name
     }
+  );
 
+  if (error) {
+    console.error(error);
 
-    if (!exam) {
+    $("startBtn").disabled = false;
 
-        return;
+    $("error").textContent =
+      error.message || "تعذر بدء الامتحان.";
 
-    }
+    return;
+  }
 
+  if (!data || !data.attempt_id) {
+    $("startBtn").disabled = false;
+    $("error").textContent =
+      "تعذر بدء الامتحان. حاول مرة أخرى.";
 
-    $("startBtn")
-        .disabled = true;
+    return;
+  }
 
+  attemptId = data.attempt_id;
 
-    $("error")
-        .textContent =
-            "جاري بدء الامتحان...";
+  questions = Array.isArray(data.questions)
+    ? data.questions
+    : [];
 
+  if (!questions.length) {
+    $("startBtn").disabled = false;
+    $("error").textContent =
+      "الامتحان لا يحتوي على أسئلة.";
 
-    try {
+    return;
+  }
 
-        const { data, error } =
-            await client.rpc(
-                "start_public_attempt_with_expiry",
-                {
-                    p_code:
-                        exam.code,
+  answers = new Array(questions.length).fill(null);
 
-                    p_student_name:
-                        name
-                }
-            );
+  /*
+    السيرفر هو المسؤول عن وقت الامتحان.
+    نستخدم ends_at القادم من قاعدة البيانات.
+  */
 
+  endAt = new Date(data.ends_at).getTime();
 
-        if (error) {
+  if (!Number.isFinite(endAt)) {
+    $("startBtn").disabled = false;
+    $("error").textContent =
+      "حدث خطأ في توقيت الامتحان.";
 
-            throw error;
+    return;
+  }
 
-        }
+  $("start").classList.add("hidden");
+  $("exam").classList.remove("hidden");
 
+  $("liveTitle").textContent = exam.title;
+  $("studentLabel").textContent =
+    "الطالب: " + name;
 
-        attemptId =
-            data.attempt_id;
+  render();
 
+  timerId = setInterval(updateTimer, 250);
 
-        questions =
-            Array.isArray(
-                data.questions
-            )
-                ? data.questions
-                : [];
-
-
-        if (
-            questions.length === 0
-        ) {
-
-            throw new Error(
-                "الامتحان لا يحتوي على أسئلة."
-            );
-
-        }
-
-
-        answers =
-            new Array(
-                questions.length
-            ).fill(null);
-
-
-        endAt =
-            new Date(
-                data.ends_at
-            ).getTime();
-
-
-        $("start")
-            .classList
-            .add("hidden");
-
-
-        $("exam")
-            .classList
-            .remove("hidden");
-
-
-        $("liveTitle")
-            .textContent =
-                exam.title;
-
-
-        $("studentLabel")
-            .textContent =
-                "الطالب: " + name;
-
-
-        render();
-
-
-        timerId =
-            setInterval(
-                updateTimer,
-                250
-            );
-
-
-        updateTimer();
-
-    } catch (error) {
-
-        console.error(error);
-
-
-        $("startBtn")
-            .disabled = false;
-
-
-        $("error")
-            .textContent =
-                cleanError(
-                    error.message
-                );
-
-    }
-
+  updateTimer();
 }
-
-
-/* =========================================================
-   TIMER
-========================================================= */
 
 function updateTimer() {
+  if (!endAt || submitted) return;
 
-    const left =
-        Math.max(
-            0,
-            endAt -
-            Date.now()
-        );
+  const left = Math.max(
+    0,
+    endAt - Date.now()
+  );
 
+  const seconds = Math.ceil(left / 1000);
 
-    const seconds =
-        Math.ceil(
-            left / 1000
-        );
+  const minutes = Math.floor(seconds / 60);
+  const sec = seconds % 60;
 
+  $("timer").textContent =
+    String(minutes).padStart(2, "0") +
+    ":" +
+    String(sec).padStart(2, "0");
 
-    const minutes =
-        Math.floor(
-            seconds / 60
-        );
-
-
-    const sec =
-        seconds % 60;
-
-
-    $("timer")
-        .textContent =
-            String(
-                minutes
-            ).padStart(
-                2,
-                "0"
-            )
-            +
-            ":"
-            +
-            String(
-                sec
-            ).padStart(
-                2,
-                "0"
-            );
-
-
-    if (
-        left <= 0
-    ) {
-
-        clearInterval(
-            timerId
-        );
-
-
-        submitExam(
-            true
-        );
-
-    }
-
+  if (left <= 0) {
+    clearInterval(timerId);
+    submitExam(true);
+  }
 }
-
-
-/* =========================================================
-   RENDER
-========================================================= */
 
 function render() {
+  const q = questions[current];
 
-    const question =
-        questions[current];
+  if (!q) return;
 
+  $("qmeta").textContent =
+    `السؤال ${current + 1} من ${questions.length}`;
 
-    if (!question) {
-        return;
-    }
+  const options = Array.isArray(q.options)
+    ? q.options
+    : [];
 
-
-    $("qmeta")
-        .textContent =
-            `السؤال ${current + 1} من ${questions.length}`;
-
-
-    $("question")
-        .innerHTML =
-
-        `
-        <div class="q">
-            ${esc(question.text)}
-        </div>
-
-        ${question.options
-            .map(
-                (option, index) =>
-
-                    `
-                    <button
-                        type="button"
-                        class="option ${
-                            answers[current] === index
-                                ? "selected"
-                                : ""
-                        }"
-                        data-index="${index}"
-                    >
-                        ${esc(option)}
-                    </button>
-                    `
-            )
-            .join("")
-        }
+  $("question").innerHTML =
+    `<div class="q">${esc(q.text || q.question_text || "")}</div>` +
+    options
+      .map((option, index) => {
+        return `
+          <button
+            class="option ${
+              answers[current] === index
+                ? "selected"
+                : ""
+            }"
+            data-index="${index}"
+            type="button"
+          >
+            ${esc(option)}
+          </button>
         `;
+      })
+      .join("");
 
+  document
+    .querySelectorAll(".option")
+    .forEach((button) => {
+      button.onclick = () => {
+        if (submitted) return;
 
-    document
-        .querySelectorAll(
-            ".option"
-        )
-        .forEach(
-            button => {
+        answers[current] =
+          Number(button.dataset.index);
 
-                button.onclick =
-                    () => {
+        render();
+      };
+    });
 
-                        answers[current] =
-                            Number(
-                                button.dataset.index
-                            );
+  const progress =
+    ((current + 1) / questions.length) * 100;
 
-                        render();
+  $("progress").style.width =
+    progress + "%";
 
-                    };
+  $("prev").disabled =
+    current === 0;
 
-            }
-        );
+  $("next").classList.toggle(
+    "hidden",
+    current === questions.length - 1
+  );
 
-
-    $("progress")
-        .style
-        .width =
-            (
-                (
-                    current + 1
-                )
-                /
-                questions.length
-                *
-                100
-            )
-            +
-            "%";
-
-
-    $("prev")
-        .disabled =
-            current === 0;
-
-
-    $("next")
-        .classList
-        .toggle(
-            "hidden",
-            current ===
-                questions.length - 1
-        );
-
-
-    $("submit")
-        .classList
-        .toggle(
-            "hidden",
-            current !==
-                questions.length - 1
-        );
-
+  $("submit").classList.toggle(
+    "hidden",
+    current !== questions.length - 1
+  );
 }
 
+$("prev").onclick = () => {
+  if (submitted) return;
 
-/* =========================================================
-   NAVIGATION
-========================================================= */
+  if (current > 0) {
+    current--;
+    render();
+  }
+};
 
-$("prev")
-    .onclick =
-        () => {
+$("next").onclick = () => {
+  if (submitted) return;
 
-            if (
-                current > 0
-            ) {
+  if (current < questions.length - 1) {
+    current++;
+    render();
+  }
+};
 
-                current--;
+$("submit").onclick = () => {
+  submitExam(false);
+};
 
-                render();
+async function submitExam(autoSubmit = false) {
+  if (submitted) return;
 
-            }
+  submitted = true;
 
-        };
+  if (timerId) {
+    clearInterval(timerId);
+  }
 
+  const payload = questions.map((q, index) => ({
+    question_id: q.id,
+    selected_index: answers[index]
+  }));
 
-$("next")
-    .onclick =
-        () => {
+  $("exam").classList.add("hidden");
+  $("result").classList.remove("hidden");
 
-            if (
-                current <
-                questions.length - 1
-            ) {
+  $("score").innerHTML =
+    "<p>جاري تسليم الامتحان وحساب الدرجة...</p>";
 
-                current++;
-
-                render();
-
-            }
-
-        };
-
-
-$("submit")
-    .onclick =
-        () =>
-            submitExam(false);
-
-
-/* =========================================================
-   SUBMIT
-========================================================= */
-
-async function submitExam(
-    automatic
-) {
-
-    if (submitted) {
-        return;
+  const { data, error } = await client.rpc(
+    "submit_public_attempt",
+    {
+      p_attempt_id: attemptId,
+      p_answers: payload
     }
+  );
 
+  if (error) {
+    console.error(error);
 
-    submitted = true;
+    $("score").innerHTML = `
+      <p class="error">
+        حدث خطأ أثناء التسليم:
+        ${esc(error.message)}
+      </p>
+    `;
 
+    return;
+  }
 
-    clearInterval(
-        timerId
-    );
+  const score =
+    data && data.score != null
+      ? data.score
+      : 0;
 
+  const total =
+    data && data.total != null
+      ? data.total
+      : questions.length;
 
-    const payload =
-        questions.map(
-            (question, index) => ({
+  $("score").innerHTML = `
+    <div style="
+      font-size:30px;
+      font-weight:900;
+      margin-bottom:10px;
+    ">
+      ${score} / ${total}
+    </div>
 
-                question_id:
-                    question.id,
-
-                selected_index:
-                    answers[index]
-
-            })
-        );
-
-
-    $("exam")
-        .classList
-        .add("hidden");
-
-
-    $("result")
-        .classList
-        .remove("hidden");
-
-
-    $("score")
-        .innerHTML =
-            "<p>جاري تسليم الامتحان وحساب الدرجة...</p>";
-
-
-    try {
-
-        const { data, error } =
-            await client.rpc(
-                "submit_public_attempt",
-                {
-                    p_attempt_id:
-                        attemptId,
-
-                    p_answers:
-                        payload
-                }
-            );
-
-
-        if (error) {
-
-            throw error;
-
-        }
-
-
-        $("score")
-            .innerHTML =
-
-            `
-            <div
-                style="
-                    font-size:30px;
-                    font-weight:900;
-                "
-            >
-                ${data.score} / ${data.total}
-            </div>
-
-            <p>
-                ${
-                    automatic
-                        ? "⏰ انتهى الوقت وتم التسليم تلقائيًا."
-                        : "🎉 تم التسليم بنجاح."
-                }
-            </p>
-            `;
-
-    } catch (error) {
-
-        console.error(error);
-
-
-        $("score")
-            .innerHTML =
-
-            `
-            <p class="error">
-                حدث خطأ أثناء تسليم الامتحان:
-                ${esc(error.message)}
-            </p>
-            `;
-
-    }
-
+    <p>
+      ${
+        autoSubmit
+          ? "⏰ انتهى الوقت وتم التسليم تلقائيًا."
+          : "🎉 تم التسليم بنجاح."
+      }
+    </p>
+  `;
 }
-
-
-/* =========================================================
-   ESCAPE
-========================================================= */
 
 function esc(value) {
-
-    return String(
-        value ?? ""
-    )
-        .replace(
-            /[&<>"']/g,
-            character =>
-                ({
-                    "&":
-                        "&amp;",
-
-                    "<":
-                        "&lt;",
-
-                    ">":
-                        "&gt;",
-
-                    '"':
-                        "&quot;",
-
-                    "'":
-                        "&#039;"
-                }[character])
-        );
-
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    (char) => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#039;"
+    })[char]
+  );
 }
-
-
-/* =========================================================
-   ERROR
-========================================================= */
-
-function cleanError(
-    message
-) {
-
-    const text =
-        String(
-            message || ""
-        );
-
-
-    return text
-        .replace(
-            /^Error:\s*/i,
-            ""
-        );
-
-}
-
 
 init();
