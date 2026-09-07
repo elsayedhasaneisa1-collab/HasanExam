@@ -4,6 +4,7 @@ const SUPABASE_KEY = "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc";
 const $ = id => document.getElementById(id);
 let rows = [];
 let questionNumber = 0;
+let authenticated = false;
 
 async function rpc(fn, body = {}) {
   const r = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
@@ -47,6 +48,7 @@ function percentage(x) {
 }
 
 function openMenu() {
+  if (!authenticated) return;
   $("menu").classList.add("open");
   $("overlay").classList.add("open");
 }
@@ -57,6 +59,7 @@ function closeMenu() {
 }
 
 function showPage(id) {
+  if (!authenticated) return;
   document.querySelectorAll(".page").forEach(page => page.classList.add("hidden"));
   const target = $(id);
   if (target) target.classList.remove("hidden");
@@ -155,6 +158,7 @@ function renumberQuestions() {
 }
 
 function addQuestion() {
+  if (!authenticated) return;
   const questions = $("questions");
   if (!questions) return;
 
@@ -188,6 +192,7 @@ function addQuestion() {
 }
 
 function createExam() {
+  if (!authenticated) return;
   return (async () => {
     try {
       const title = $("examTitle").value.trim() || "امتحان اللغة العربية";
@@ -318,6 +323,7 @@ function drawPdfPage(pageRows, pageNumber, totalPages) {
 }
 
 function downloadPdf() {
+  if (!authenticated) return;
   if (!rows.length) {
     alert("لا توجد نتائج لتنزيلها.");
     return;
@@ -347,6 +353,7 @@ function downloadPdf() {
 }
 
 async function loadResults() {
+  if (!authenticated) return;
   try {
     const response = await rpc("teacher_public_results");
     rows = Array.isArray(response) ? response : [];
@@ -391,20 +398,26 @@ function authenticate(event) {
   }
 
   error.textContent = "";
+  authenticated = true;
   document.body.classList.add("authenticated");
   $("login").classList.add("hidden");
+  $("login").setAttribute("aria-hidden", "true");
   $("app").classList.remove("hidden");
   $("app").setAttribute("aria-hidden", "false");
+  $("app").removeAttribute("inert");
   loadResults();
 }
 
 function logout() {
   // لا نحفظ جلسة المدرس في sessionStorage/localStorage.
   // عند إعادة فتح الصفحة سيطلب كلمة المرور مرة أخرى.
+  authenticated = false;
   document.body.classList.remove("authenticated");
   $("app").classList.add("hidden");
-  $("login").classList.remove("hidden");
   $("app").setAttribute("aria-hidden", "true");
+  $("app").setAttribute("inert", "");
+  $("login").classList.remove("hidden");
+  $("login").setAttribute("aria-hidden", "false");
   $("user").value = "";
   $("pass").value = "";
   $("err").textContent = "";
@@ -413,10 +426,13 @@ function logout() {
 
 document.addEventListener("DOMContentLoaded", () => {
   // حماية إضافية: لا توجد جلسة محفوظة تفتح اللوحة تلقائيًا.
+  authenticated = false;
   document.body.classList.remove("authenticated");
   $("app").classList.add("hidden");
-  $("login").classList.remove("hidden");
   $("app").setAttribute("aria-hidden", "true");
+  $("app").setAttribute("inert", "");
+  $("login").classList.remove("hidden");
+  $("login").setAttribute("aria-hidden", "false");
 
   $("loginForm").addEventListener("submit", authenticate);
   $("logout").addEventListener("click", logout);

@@ -68,3 +68,25 @@ header{box-shadow:0 12px 40px #0005}
   .modal-box{padding:22px 16px}
   .modal-stat{grid-template-columns:1fr}
 }
+
+
+/* ===== AUTH / MOBILE HARDENING ===== */
+html,body{min-height:100%;}
+body:not(.authenticated) #app{display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;}
+body.authenticated #login{display:none!important;visibility:hidden!important;pointer-events:none!important;}
+body:not(.authenticated) #detailsModal{display:none!important;}
+.login{min-height:100svh;}
+.login-box{max-width:420px;}
+.login-box input{min-height:46px;}
+.login-box button{min-height:46px;}
+@media(max-width:520px){
+  .login{padding:14px;}
+  .login-box{padding:26px 18px;border-radius:20px;}
+  .login-box h1{font-size:24px;}
+  .login-box p{line-height:1.8;}
+  .hero{width:100%;}
+  .stats{grid-template-columns:1fr 1fr!important;}
+  .stats article{min-width:0;}
+  .qhead{align-items:stretch!important;}
+  .qhead>*{max-width:100%;}
+}

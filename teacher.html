@@ -1,9 +1,9 @@
 <!doctype html><html lang="ar" dir="rtl"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>مركز أستاذ حسن عيسى</title><style>#app{display:none!important}#detailsModal{display:none!important}body.authenticated #app{display:block!important}body.authenticated #login{display:none!important}</style><link rel="stylesheet" href="teacher.css"></head><body>
-<div id="login" class="login"><div class="login-box"><div class="logo">ح</div><span>TEACHER CENTER</span><h1>مرحبًا أستاذ حسن</h1><p>إدارة الامتحانات ونتائج الطلاب</p>
+<div id="login" class="login" aria-hidden="false"><div class="login-box"><div class="logo">ح</div><span>TEACHER CENTER</span><h1>مرحبًا أستاذ حسن</h1><p>إدارة الامتحانات ونتائج الطلاب</p>
 <form id="loginForm"><label>اسم المستخدم</label><input id="user" required><label>كلمة المرور</label><input id="pass" type="password" required><button>دخول</button><b id="err"></b></form></div></div>
-<div id="app" class="hidden">
+<div id="app" class="hidden" aria-hidden="true" inert>
 <header><button id="hamb">☰</button><div><strong>مركز أستاذ حسن عيسى</strong><small>لوحة إدارة الامتحانات</small></div><button id="refreshTop">↻</button></header>
 <div id="overlay"></div><nav id="menu"><div class="menu-title"><div class="mini">ح</div><div><b>الأستاذ حسن عيسى</b><small>مدير الامتحانات</small></div><button id="close">×</button></div>
 <button class="nav active" data-page="dashboard">⌂ <span>الرئيسية</span></button><button class="nav" data-page="results">▣ <span>النتائج</span></button><button class="nav" data-page="create">＋ <span>إنشاء امتحان</span></button><button id="logout">↪ تسجيل الخروج</button></nav>
