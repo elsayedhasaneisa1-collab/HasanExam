@@ -2,23 +2,11 @@
   box-sizing: border-box;
 }
 
-:root {
-  --bg-primary: #060b14;
-  --bg-card: rgba(255, 255, 255, 0.075);
-  --border-card: rgba(255, 255, 255, 0.13);
-  --text-primary: #f5f8ff;
-  --text-muted: rgba(255, 255, 255, 0.65);
-  --blue: #168cff;
-  --blue-hover: #4eafff;
-  --green: #0da66d;
-  --red: #ff7187;
-}
-
 body {
   margin: 0;
   min-height: 100vh;
   background: radial-gradient(circle at top, #123968 0%, #071426 45%, #030914 100%);
-  color: var(--text-primary);
+  color: #f5f8ff;
   font-family: Tahoma, Arial, sans-serif;
   direction: rtl;
 }
@@ -63,21 +51,16 @@ body {
 
 /* ===== Cards ===== */
 .card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-card);
+  background: rgba(255, 255, 255, 0.075);
+  border: 1px solid rgba(255, 255, 255, 0.13);
   border-radius: 24px;
   padding: 24px;
   box-shadow: 0 18px 55px rgba(0, 0, 0, 0.33);
   backdrop-filter: blur(15px);
-  transition: all 0.3s ease;
 }
 
 .card.center {
   text-align: center;
-}
-
-.card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* ===== Typography ===== */
@@ -132,7 +115,7 @@ input {
 }
 
 input:focus {
-  border-color: var(--blue);
+  border-color: #168cff;
   box-shadow: 0 0 0 3px rgba(22, 136, 255, 0.2);
 }
 
@@ -175,35 +158,14 @@ button:disabled {
 .submit {
   width: 100%;
   margin-top: 14px;
-  background: var(--green);
+  background: #0da66d;
 }
 
 .submit:hover:not(:disabled) {
   box-shadow: 0 8px 25px rgba(13, 166, 109, 0.4);
 }
 
-/* ===== Options ===== */
-.option {
-  display: block;
-  width: 100%;
-  text-align: right;
-  margin: 9px 0;
-  background: rgba(255, 255, 255, 0.031);
-  border: 1px solid rgba(255, 255, 255, 0.086);
-  padding: 14px 18px;
-  font-weight: 600;
-}
-
-.option:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.option.selected {
-  background: rgba(22, 136, 255, 0.22);
-  border-color: var(--blue-hover);
-}
-
-/* ===== Exam Interface ===== */
+/* ===== Exam ===== */
 .examTop {
   display: flex;
   justify-content: space-between;
@@ -275,28 +237,11 @@ button:disabled {
 }
 
 .error {
-  color: var(--red) !important;
+  color: #ff7187 !important;
 }
 
 .muted {
   opacity: 0.6 !important;
-}
-
-/* ===== Spinner ===== */
-.spinner {
-  width: 35px;
-  height: 35px;
-  border: 4px solid rgba(255, 255, 255, 0.09);
-  border-top-color: var(--blue);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 8px auto 15px;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* ===== Footer ===== */
@@ -312,25 +257,25 @@ footer {
   .page {
     padding: 10px;
   }
-  
+
   .card {
     padding: 18px;
   }
-  
+
   .q {
     font-size: 19px;
   }
-  
+
   .timer {
     font-size: 20px;
   }
-  
+
   .examTop {
     align-items: flex-start;
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .brand h1 {
     font-size: 17px;
   }

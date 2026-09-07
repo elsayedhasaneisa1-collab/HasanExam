@@ -20,7 +20,8 @@
       <!-- شاشة التحميل -->
       <section id="loading" class="card center">
         <div class="spinner"></div>
-        <h2>جاري تحميل الامتحان...</h2>
+        <h2>⏳ جاري تحميل الامتحان...</h2>
+        <p style="opacity:0.5;font-size:13px;">يرجى الانتظار...</p>
       </section>
 
       <!-- شاشة البداية -->
@@ -31,7 +32,7 @@
         <p id="examInfo"></p>
         <div class="notice">✏️ اكتب اسمك كما تريد أن يظهر في النتيجة.</div>
         <input id="studentName" maxlength="80" autocomplete="name" placeholder="اكتب اسمك هنا">
-        <button id="startBtn" disabled>ابدأ الامتحان 🚀</button>
+        <button id="startBtn" disabled>🚀 ابدأ الامتحان</button>
         <p id="error" class="error"></p>
       </section>
 
@@ -42,24 +43,24 @@
             <b id="liveTitle"></b>
             <small id="studentLabel"></small>
           </div>
-          <div class="timer" id="timer">00:00</div>
+          <div class="timer" id="timer">⏱️ 00:00</div>
         </div>
         <div class="card">
           <div class="progressLine"><span id="progress"></span></div>
           <div class="qmeta" id="qmeta"></div>
           <div id="question"></div>
           <div class="nav">
-            <button id="prev">السابق</button>
-            <button id="next">التالي</button>
+            <button id="prev" disabled>⬅️ السابق</button>
+            <button id="next">التالي ➡️</button>
           </div>
-          <button id="submit" class="submit hidden">تسليم الامتحان ✅</button>
+          <button id="submit" class="submit hidden">📤 تسليم الامتحان ✅</button>
         </div>
       </section>
 
       <!-- شاشة النتيجة -->
       <section id="result" class="card center hidden">
         <div class="trophy">🏆</div>
-        <h2>تم تسليم الامتحان</h2>
+        <h2>✅ تم تسليم الامتحان</h2>
         <div id="score"></div>
         <p class="muted">يمكنك إغلاق الصفحة الآن.</p>
       </section>
