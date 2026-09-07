@@ -6,15 +6,8 @@
     <title>لوحة أستاذ حسن عيسى</title>
     
     <style>
-        /* ============================================================
-           كل الـ CSS في مكان واحد
-        ============================================================ */
-        
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        /* ===== جميع التنسيقات ===== */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
         body {
             background: #060a12;
@@ -27,7 +20,6 @@
         .hidden { display: none !important; }
         .error { color: #ff7187 !important; font-size: 13px; margin-top: 6px; }
         
-        /* ===== تسجيل الدخول ===== */
         #login {
             min-height: 100vh;
             display: grid;
@@ -93,12 +85,10 @@
         .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(37,136,255,0.3); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
         
-        /* ===== التطبيق ===== */
         #app { display: none !important; max-width: 1100px; margin: 0 auto; padding: 0 12px; }
         body.authenticated #app { display: block !important; }
         body.authenticated #login { display: none !important; }
         
-        /* ===== الهيدر ===== */
         .topbar {
             display: flex;
             align-items: center;
@@ -156,7 +146,6 @@
         }
         .btn-secondary:hover { background: rgba(255,255,255,0.12); transform: translateY(-2px); }
         
-        /* ===== البطاقات ===== */
         .card {
             background: rgba(12,19,32,0.9);
             border: 1px solid #1d3048;
@@ -177,7 +166,6 @@
         .card-header h2 { font-size: 19px; margin: 0 0 4px; }
         .card-header p { color: #8293aa; font-size: 13px; margin: 0; }
         
-        /* ===== الحقول ===== */
         .field { margin-bottom: 12px; }
         .field label { display: block; font-size: 12px; color: #aebdd0; margin-bottom: 4px; font-weight: 700; }
         .field input, .field textarea, .field select {
@@ -196,7 +184,6 @@
         
         .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
         
-        /* ===== الأسئلة ===== */
         .questions-header {
             display: flex;
             justify-content: space-between;
@@ -328,7 +315,6 @@
         .empty-questions p { font-size: 14px; margin: 0; }
         .empty-questions .sub { font-size: 12px; opacity: 0.6; margin-top: 2px; }
         
-        /* ===== الامتحان المنشأ ===== */
         .exam-result-box {
             background: rgba(0,0,0,0.2);
             border-radius: 12px;
@@ -363,7 +349,6 @@
             margin-top: 12px;
         }
         
-        /* ===== جدول النتائج ===== */
         .table-wrap {
             overflow-x: auto;
             margin: 10px 0 12px;
@@ -405,7 +390,6 @@
             text-align: center;
         }
         
-        /* ===== المودال ===== */
         .modal {
             position: fixed;
             inset: 0;
@@ -441,7 +425,6 @@
         .modal-close:hover { color: #fff; }
         .modal-box h2 { margin: 0 0 14px; }
         
-        /* ===== Toast ===== */
         .toast {
             position: fixed;
             bottom: 20px;
@@ -463,11 +446,9 @@
         .toast.error { background: linear-gradient(135deg, #ff7187, #d43a54); }
         .toast.info { background: linear-gradient(135deg, #2588ff, #0b5ed6); }
         
-        /* ===== الفوتر ===== */
         .footer { text-align: center; padding: 20px; }
         .footer p { font-size: 10px; color: #8293aa; margin: 3px 0; }
         
-        /* ===== ريسبونسيف ===== */
         @media (max-width: 768px) {
             .topbar { padding: 10px 14px; }
             .topbar .brand h1 { font-size: 14px; }
@@ -495,9 +476,7 @@
 
 <div class="teacher-page">
 
-    <!-- ============================================================
-         تسجيل الدخول
-    ============================================================ -->
+    <!-- ===== تسجيل الدخول ===== -->
     <section id="login">
         <div class="login-card">
             <div class="logo">ح</div>
@@ -519,9 +498,7 @@
         </div>
     </section>
 
-    <!-- ============================================================
-         لوحة التحكم
-    ============================================================ -->
+    <!-- ===== لوحة التحكم ===== -->
     <main id="app">
 
         <!-- الهيدر -->
@@ -604,7 +581,7 @@
             </div>
         </div>
 
-        <!-- ===== النتائج ===== -->
+        <!-- ===== النتائج + التيليجرام ===== -->
         <div class="card">
             <div class="card-header">
                 <div>
@@ -617,6 +594,16 @@
             <div class="field">
                 <label>🔑 كود الامتحان</label>
                 <input id="resultsCode" type="text" maxlength="20" placeholder="أدخل كود الامتحان">
+            </div>
+
+            <!-- ✅ أزرار التيليجرام -->
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0;">
+                <button id="sendTelegramBtn" class="btn-primary" disabled>
+                    📤 إرسال للتيليجرام
+                </button>
+                <button id="setupTelegramBtn" class="btn-secondary">
+                    ⚙️ إعداد البوت
+                </button>
             </div>
 
             <p id="resultsError" class="error"></p>
@@ -680,7 +667,7 @@
 ============================================================ -->
 <script>
 // ============================================================
-// منصة أستاذ حسن عيسى - teacher.js
+// teacher.js - مع التيليجرام
 // ============================================================
 
 console.log('🚀 teacher.js بدأ التحميل');
@@ -697,8 +684,289 @@ const TEACHER_USERNAME = 'Hasan';
 const TEACHER_PASSWORD = '25808';
 
 // ============================================================
-// حالة التطبيق
+// إعدادات التيليجرام
 // ============================================================
+
+// 🔴 مهم: ضع التوكن ومعرف الشات هنا أو من خلال واجهة الإعدادات
+const TELEGRAM_CONFIG = {
+    botToken: '',  8983761376:AAFDpzLJQcAVK7dallZ7Wa9K1tAljPBs_8s
+    chatId: '',    5337377165
+    isConfigured: false
+};
+
+// تحميل الإعدادات من التخزين المحلي
+function loadTelegramConfig() {
+    const saved = localStorage.getItem('telegram_config');
+    if (saved) {
+        try {
+            const config = JSON.parse(saved);
+            TELEGRAM_CONFIG.botToken = config.botToken || '';
+            TELEGRAM_CONFIG.chatId = config.chatId || '';
+            TELEGRAM_CONFIG.isConfigured = !!(config.botToken && config.chatId);
+        } catch (e) {
+            console.error('خطأ في تحميل إعدادات التيليجرام', e);
+        }
+    }
+    updateTelegramButtons();
+}
+
+// حفظ إعدادات التيليجرام
+function saveTelegramConfig(botToken, chatId) {
+    TELEGRAM_CONFIG.botToken = botToken;
+    TELEGRAM_CONFIG.chatId = chatId;
+    TELEGRAM_CONFIG.isConfigured = !!(botToken && chatId);
+    localStorage.setItem('telegram_config', JSON.stringify({
+        botToken: botToken,
+        chatId: chatId
+    }));
+    updateTelegramButtons();
+    showToast('✅ تم حفظ إعدادات التيليجرام', 'success');
+}
+
+// تحديث حالة الأزرار
+function updateTelegramButtons() {
+    const sendBtn = document.getElementById('sendTelegramBtn');
+    const setupBtn = document.getElementById('setupTelegramBtn');
+    
+    if (sendBtn) {
+        sendBtn.disabled = !TELEGRAM_CONFIG.isConfigured || STATE.lastResults.length === 0;
+    }
+    
+    if (setupBtn) {
+        setupBtn.textContent = TELEGRAM_CONFIG.isConfigured ? '🔄 تحديث الإعدادات' : '⚙️ إعداد البوت';
+    }
+}
+
+// ============================================================
+// نافذة إعداد البوت
+// ============================================================
+
+function setupTelegram() {
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: grid;
+        place-items: center;
+        padding: 20px;
+        backdrop-filter: blur(8px);
+    `;
+    
+    modal.innerHTML = `
+        <div style="
+            background: #0b1422;
+            border: 1px solid #1d3048;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 30px 100px rgba(0,0,0,0.8);
+        ">
+            <h2 style="color:#5ce1ff;margin:0 0 8px;">🤖 إعداد بوت التيليجرام</h2>
+            <p style="color:#8293aa;font-size:13px;margin-bottom:20px;">
+                أدخل توكن البوت ومعرف الشات لإرسال كل نتيجة على حدة
+            </p>
+            
+            <div style="margin-bottom:12px;">
+                <label style="display:block;font-size:12px;color:#aebdd0;margin-bottom:4px;">🤖 توكن البوت</label>
+                <input id="telegramBotToken" type="text" 
+                    value="${TELEGRAM_CONFIG.botToken}"
+                    placeholder="مثال: 123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
+                    style="width:100%;padding:11px 14px;border-radius:11px;border:1px solid #263d58;background:#080f1a;color:#fff;font-size:14px;outline:none;">
+            </div>
+            
+            <div style="margin-bottom:20px;">
+                <label style="display:block;font-size:12px;color:#aebdd0;margin-bottom:4px;">📱 معرف الشات (Chat ID)</label>
+                <input id="telegramChatId" type="text" 
+                    value="${TELEGRAM_CONFIG.chatId}"
+                    placeholder="مثال: 123456789"
+                    style="width:100%;padding:11px 14px;border-radius:11px;border:1px solid #263d58;background:#080f1a;color:#fff;font-size:14px;outline:none;">
+            </div>
+            
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                <button id="telegramSaveBtn" style="
+                    background:linear-gradient(135deg,#2588ff,#0b5ed6);
+                    color:#fff;
+                    border:none;
+                    padding:12px;
+                    border-radius:11px;
+                    font-weight:700;
+                    font-size:14px;
+                    cursor:pointer;
+                ">💾 حفظ الإعدادات</button>
+                <button id="telegramCloseBtn" style="
+                    background:rgba(255,255,255,0.06);
+                    border:1px solid rgba(255,255,255,0.08);
+                    color:#fff;
+                    padding:12px;
+                    border-radius:11px;
+                    font-weight:700;
+                    font-size:14px;
+                    cursor:pointer;
+                ">❌ إلغاء</button>
+            </div>
+            
+            <p id="telegramError" style="color:#ff7187;font-size:12px;margin-top:10px;"></p>
+            
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid #1d3048;font-size:11px;color:#8293aa;">
+                💡 <a href="https://t.me/BotFather" target="_blank" style="color:#5ce1ff;">@BotFather</a> لإنشاء بوت جديد<br>
+                💡 <a href="https://t.me/userinfobot" target="_blank" style="color:#5ce1ff;">@userinfobot</a> لمعرفة معرف الشات<br>
+                📌 سيتم إرسال <strong>كل نتيجة على حدة</strong> + ملخص نهائي
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    modal.querySelector('#telegramSaveBtn').addEventListener('click', function() {
+        const botToken = modal.querySelector('#telegramBotToken').value.trim();
+        const chatId = modal.querySelector('#telegramChatId').value.trim();
+        const errorEl = modal.querySelector('#telegramError');
+        
+        errorEl.textContent = '';
+        
+        if (!botToken || !chatId) {
+            errorEl.textContent = '❌ الرجاء إدخال التوكن ومعرف الشات';
+            return;
+        }
+        
+        saveTelegramConfig(botToken, chatId);
+        modal.remove();
+        showToast('✅ تم حفظ إعدادات التيليجرام', 'success');
+    });
+    
+    modal.querySelector('#telegramCloseBtn').addEventListener('click', function() {
+        modal.remove();
+    });
+    
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// ============================================================
+// دالة إرسال كل نتيجة على حدة للتيليجرام
+// ============================================================
+
+async function sendResultsToTelegram() {
+    if (!TELEGRAM_CONFIG.isConfigured) {
+        showToast('⚠️ قم بإعداد البوت أولاً', 'error');
+        return;
+    }
+    
+    if (!STATE.lastResults.length) {
+        showToast('📭 لا توجد نتائج لإرسالها', 'error');
+        return;
+    }
+    
+    const code = resultsCodeInput.value.trim();
+    if (!code) {
+        showToast('📝 اكتب كود الامتحان أولاً', 'error');
+        return;
+    }
+    
+    const sendBtn = document.getElementById('sendTelegramBtn');
+    sendBtn.disabled = true;
+    sendBtn.textContent = '⏳ جاري الإرسال...';
+    
+    try {
+        let successCount = 0;
+        let failCount = 0;
+        
+        // ===== إرسال كل نتيجة على حدة =====
+        for (let i = 0; i < STATE.lastResults.length; i++) {
+            const row = STATE.lastResults[i];
+            const score = row.score ?? 0;
+            const total = row.total ?? row.question_count ?? '-';
+            const status = row.submitted_at ? '✅ تم التسليم' : '⏳ لم يتم التسليم';
+            const submittedTime = row.submitted_at ? new Date(row.submitted_at).toLocaleString('ar-EG') : '-';
+            const name = row.student_name || 'غير معروف';
+            
+            // ===== بناء رسالة كل طالب =====
+            let message = `🎓 *نتيجة الطالب*\n\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `👤 *الطالب:* ${name}\n`;
+            message += `🔑 *كود الامتحان:* ${code}\n`;
+            message += `📊 *الدرجة:* ${score} / ${total}\n`;
+            message += `📌 *الحالة:* ${status}\n`;
+            message += `🕐 *وقت التسليم:* ${submittedTime}\n`;
+            message += `━━━━━━━━━━━━━━━━━━━━\n`;
+            message += `📅 *تاريخ التقرير:* ${new Date().toLocaleString('ar-EG')}\n`;
+            message += `🏫 *أستاذ حسن عيسى*`;
+            
+            // ===== إرسال للتيليجرام =====
+            const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+            
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CONFIG.chatId,
+                    text: message,
+                    parse_mode: 'Markdown',
+                    disable_web_page_preview: true
+                })
+            });
+            
+            const result = await response.json();
+            
+            if (result.ok) {
+                successCount++;
+            } else {
+                failCount++;
+                console.error('خطأ في إرسال نتيجة:', result);
+            }
+            
+            // ===== تأخير بسيط بين كل رسالة وأخرى (تجنب حظر البوت) =====
+            if (i < STATE.lastResults.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 500));
+            }
+        }
+        
+        // ===== إرسال ملخص =====
+        let summary = `📊 *ملخص النتائج*\n\n`;
+        summary += `━━━━━━━━━━━━━━━━━━━━\n`;
+        summary += `🔑 *كود الامتحان:* ${code}\n`;
+        summary += `📊 *عدد الطلاب:* ${STATE.lastResults.length}\n`;
+        summary += `✅ *تم الإرسال:* ${successCount}\n`;
+        summary += `❌ *فشل الإرسال:* ${failCount}\n`;
+        summary += `🏆 *أعلى درجة:* ${Math.max(...STATE.lastResults.map(r => r.score ?? 0))}\n`;
+        summary += `━━━━━━━━━━━━━━━━━━━━\n`;
+        summary += `📅 *تاريخ التقرير:* ${new Date().toLocaleString('ar-EG')}`;
+        
+        const url = `https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`;
+        await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CONFIG.chatId,
+                text: summary,
+                parse_mode: 'Markdown',
+                disable_web_page_preview: true
+            })
+        });
+        
+        showToast(`✅ تم إرسال ${successCount} نتيجة للتيليجرام`, 'success');
+        
+    } catch (error) {
+        console.error('Telegram error:', error);
+        showToast(`❌ فشل الإرسال: ${error.message}`, 'error');
+    } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = '📤 إرسال للتيليجرام';
+    }
+}
+
+// ============================================================
+// باقي دوال المدرس
+// ============================================================
+
 const STATE = {
     questions: [],
     lastResults: [],
@@ -707,9 +975,7 @@ const STATE = {
     isAuthenticated: false
 };
 
-// ============================================================
 // عناصر الصفحة
-// ============================================================
 const loginSection = document.getElementById('login');
 const appSection = document.getElementById('app');
 const usernameInput = document.getElementById('username');
@@ -746,10 +1012,7 @@ const closeModalBtn = document.getElementById('closeModalBtn');
 
 const toast = document.getElementById('toast');
 
-// ============================================================
 // دوال مساعدة
-// ============================================================
-
 function showToast(message, type = 'info', duration = 3000) {
     if (!toast) return;
     toast.textContent = message;
@@ -778,10 +1041,7 @@ function escapeHTML(text) {
     });
 }
 
-// ============================================================
 // المصادقة
-// ============================================================
-
 function handleLogin() {
     const username = usernameInput.value.trim();
     const password = passwordInput.value.trim();
@@ -830,10 +1090,7 @@ function checkSession() {
     return false;
 }
 
-// ============================================================
 // الأسئلة
-// ============================================================
-
 function addQuestion() {
     STATE.questions.push({
         text: '',
@@ -925,10 +1182,7 @@ window.removeQuestion = function(index) {
     renderQuestions();
 };
 
-// ============================================================
 // إنشاء الامتحان
-// ============================================================
-
 async function createExam() {
     const title = examTitleInput.value.trim();
     const duration = Number(durationInput.value);
@@ -1027,10 +1281,7 @@ async function createExam() {
     }
 }
 
-// ============================================================
 // النتائج
-// ============================================================
-
 async function loadResults() {
     const code = resultsCodeInput.value.trim();
     resultsError.textContent = '';
@@ -1061,6 +1312,7 @@ async function loadResults() {
         
         downloadPdfBtn.disabled = STATE.lastResults.length === 0;
         deleteExamBtn.disabled = true;
+        updateTelegramButtons();
         
         if (STATE.lastResults.length > 0) {
             showToast(`📊 تم تحميل ${STATE.lastResults.length} نتيجة`, 'success');
@@ -1124,10 +1376,7 @@ window.showDetails = function(index) {
     show(detailsModal);
 };
 
-// ============================================================
-// PDF - يدعم اللغة العربية بالكامل
-// ============================================================
-
+// PDF
 function downloadPDF() {
     const code = resultsCodeInput.value.trim();
     
@@ -1154,19 +1403,13 @@ function downloadPDF() {
             format: 'a4'
         });
         
-        // ===== العنوان =====
         doc.setFontSize(20);
         doc.setTextColor(37, 136, 255);
-        doc.text('نتائج امتحان أستاذ حسن عيسى', 105, 18, { 
-            align: 'center' 
-        });
+        doc.text('نتائج امتحان أستاذ حسن عيسى', 105, 18, { align: 'center' });
         
-        // ===== معلومات الامتحان =====
         doc.setFontSize(11);
         doc.setTextColor(100, 100, 100);
-        doc.text(`🔑 كود الامتحان: ${code}`, 105, 26, { 
-            align: 'center' 
-        });
+        doc.text(`🔑 كود الامتحان: ${code}`, 105, 26, { align: 'center' });
         
         const now = new Date();
         const dateStr = now.toLocaleString('ar-EG', {
@@ -1176,11 +1419,8 @@ function downloadPDF() {
             hour: '2-digit',
             minute: '2-digit'
         });
-        doc.text(`📅 تاريخ التصدير: ${dateStr}`, 105, 32, { 
-            align: 'center' 
-        });
+        doc.text(`📅 تاريخ التصدير: ${dateStr}`, 105, 32, { align: 'center' });
         
-        // ===== إعداد البيانات =====
         const rows = STATE.lastResults.map((row, i) => {
             const score = row.score ?? 0;
             const total = row.total ?? row.question_count ?? '-';
@@ -1196,12 +1436,9 @@ function downloadPDF() {
             ];
         });
         
-        // ===== إنشاء الجدول =====
         doc.autoTable({
             startY: 38,
-            head: [
-                ['#', 'الطالب', 'الدرجة', 'وقت التسليم', 'الحالة']
-            ],
+            head: [['#', 'الطالب', 'الدرجة', 'وقت التسليم', 'الحالة']],
             body: rows,
             styles: {
                 fontSize: 9,
@@ -1227,7 +1464,6 @@ function downloadPDF() {
             }
         });
         
-        // ===== إضافة تذييل =====
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
@@ -1241,7 +1477,6 @@ function downloadPDF() {
             );
         }
         
-        // ===== حفظ الملف =====
         doc.save(`نتائج-الامتحان-${code}.pdf`);
         
         STATE.pdfDownloadedForCode = code;
@@ -1254,10 +1489,7 @@ function downloadPDF() {
     }
 }
 
-// ============================================================
 // حذف الامتحان
-// ============================================================
-
 async function deleteExam() {
     const code = STATE.lastResultsCode || resultsCodeInput.value.trim();
     
@@ -1308,10 +1540,7 @@ async function deleteExam() {
     }
 }
 
-// ============================================================
 // نسخ الرابط
-// ============================================================
-
 async function copyLink() {
     if (!shareLinkInput || !shareLinkInput.value.trim()) return;
     try {
@@ -1326,18 +1555,12 @@ async function copyLink() {
     showToast('📋 تم نسخ الرابط', 'success');
 }
 
-// ============================================================
 // إغلاق المودال
-// ============================================================
-
 function closeModal() {
     hide(detailsModal);
 }
 
-// ============================================================
 // تحميل الامتحان المحفوظ
-// ============================================================
-
 function loadSavedExam() {
     const code = localStorage.getItem('hasan_last_exam_code');
     if (code && resultsCodeInput) {
@@ -1372,6 +1595,10 @@ downloadPdfBtn.addEventListener('click', downloadPDF);
 deleteExamBtn.addEventListener('click', deleteExam);
 copyLinkBtn.addEventListener('click', copyLink);
 
+// ✅ ربط أزرار التيليجرام
+document.getElementById('setupTelegramBtn')?.addEventListener('click', setupTelegram);
+document.getElementById('sendTelegramBtn')?.addEventListener('click', sendResultsToTelegram);
+
 newExamBtn.addEventListener('click', function() {
     STATE.questions = [];
     renderQuestions();
@@ -1401,6 +1628,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     renderQuestions();
     loadSavedExam();
+    loadTelegramConfig();
 });
 
 console.log('✅ teacher.js تحمّل بالكامل');

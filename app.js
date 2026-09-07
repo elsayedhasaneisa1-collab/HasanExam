@@ -1,18 +1,12 @@
 // ============================================================
-// app.js - نسخة مبسطة وقوية
+// app.js
 // ============================================================
 
 console.log('🚀 app.js بدأ التحميل');
 
-// ============================================================
-// 1. بيانات Supabase
-// ============================================================
 const SUPABASE_URL = "https://zvvfjmadziyuwutdresz.supabase.co";
 const SUPABASE_KEY = "sb_publishable_5tzbKmV1EQZTDFLtRPLhnQ_POvlG0Xc";
 
-// ============================================================
-// 2. تهيئة Supabase
-// ============================================================
 let supabaseClient = null;
 
 try {
@@ -22,9 +16,6 @@ try {
     console.error('❌ خطأ في تهيئة Supabase:', error);
 }
 
-// ============================================================
-// 3. عناصر الصفحة
-// ============================================================
 const loadingSection = document.getElementById('loading');
 const startSection = document.getElementById('start');
 const examSection = document.getElementById('exam');
@@ -48,9 +39,6 @@ const submitBtn = document.getElementById('submit');
 
 const scoreDiv = document.getElementById('score');
 
-// ============================================================
-// 4. حالة التطبيق
-// ============================================================
 const STATE = {
     exam: null,
     attemptId: null,
@@ -63,9 +51,6 @@ const STATE = {
     studentName: ''
 };
 
-// ============================================================
-// 5. دوال مساعدة
-// ============================================================
 function show(el) { if (el) el.classList.remove('hidden'); }
 function hide(el) { if (el) el.classList.add('hidden'); }
 
@@ -93,19 +78,14 @@ function escapeHTML(text) {
     });
 }
 
-// ============================================================
-// 6. جلب الامتحان - طريقة جديدة
-// ============================================================
 async function loadExam() {
     console.log('🔍 بدء تحميل الامتحان...');
 
-    // جلب كود الامتحان من الرابط
     const params = new URLSearchParams(window.location.search);
     const examCode = params.get('exam');
 
     console.log('📌 كود الامتحان:', examCode);
 
-    // لو مفيش كود
     if (!examCode) {
         showError('❌ رابط الامتحان غير صحيح - مفيش كود امتحان');
         hide(loadingSection);
@@ -116,7 +96,6 @@ async function loadExam() {
         return;
     }
 
-    // لو Supabase مش شغال
     if (!supabaseClient) {
         showError('❌ مشكلة في الاتصال بقاعدة البيانات');
         hide(loadingSection);
@@ -145,18 +124,15 @@ async function loadExam() {
             throw new Error('الامتحان غير موجود أو انتهت صلاحيته');
         }
 
-        // حفظ بيانات الامتحان
         STATE.exam = data[0];
 
         console.log('✅ تم تحميل الامتحان:', STATE.exam.title);
 
-        // عرض البيانات
         if (examTitle) examTitle.textContent = STATE.exam.title || 'امتحان';
         if (examInfo) {
             examInfo.textContent = `${STATE.exam.question_count || 0} سؤال • ${STATE.exam.duration_minutes || 0} دقيقة`;
         }
 
-        // إخفاء التحميل وإظهار البداية
         hide(loadingSection);
         show(startSection);
         if (startBtn) startBtn.disabled = false;
@@ -172,9 +148,6 @@ async function loadExam() {
     }
 }
 
-// ============================================================
-// 7. بدء الامتحان - نسخة مبسطة للتجربة
-// ============================================================
 async function startExam() {
     const name = studentNameInput ? studentNameInput.value.trim() : '';
 
@@ -189,16 +162,6 @@ async function startExam() {
     if (startBtn) {
         startBtn.disabled = true;
         startBtn.textContent = '⏳ جاري البدء...';
-    }
-
-    // لو Supabase مش شغال
-    if (!supabaseClient) {
-        showError('❌ مشكلة في الاتصال بقاعدة البيانات');
-        if (startBtn) {
-            startBtn.disabled = false;
-            startBtn.textContent = '🚀 ابدأ الامتحان';
-        }
-        return;
     }
 
     try {
@@ -220,7 +183,6 @@ async function startExam() {
             throw new Error('لم يتم استلام بيانات الامتحان');
         }
 
-        // حفظ البيانات
         STATE.attemptId = data.attempt_id;
         STATE.questions = data.questions || [];
         STATE.answers = new Array(STATE.questions.length).fill(null);
@@ -234,17 +196,14 @@ async function startExam() {
             throw new Error('لا توجد أسئلة في هذا الامتحان');
         }
 
-        // إظهار واجهة الامتحان
         hide(startSection);
         show(examSection);
 
         if (liveTitle) liveTitle.textContent = STATE.exam.title || 'امتحان';
         if (studentLabel) studentLabel.textContent = `👤 الطالب: ${name}`;
 
-        // عرض السؤال الأول
         renderQuestion();
 
-        // بدء المؤقت
         if (STATE.timerId) clearInterval(STATE.timerId);
         STATE.timerId = setInterval(updateTimer, 500);
         updateTimer();
@@ -259,9 +218,6 @@ async function startExam() {
     }
 }
 
-// ============================================================
-// 8. عرض السؤال
-// ============================================================
 function renderQuestion() {
     const q = STATE.questions[STATE.current];
     if (!q) return;
@@ -289,7 +245,6 @@ function renderQuestion() {
 
     if (questionDiv) questionDiv.innerHTML = html;
 
-    // ربط الأزرار
     document.querySelectorAll('.option').forEach(btn => {
         btn.addEventListener('click', function() {
             if (STATE.submitted) return;
@@ -298,11 +253,9 @@ function renderQuestion() {
         });
     });
 
-    // شريط التقدم
     const progress = ((STATE.current + 1) / STATE.questions.length) * 100;
     if (progressBar) progressBar.style.width = `${progress}%`;
 
-    // أزرار التنقل
     if (prevBtn) prevBtn.disabled = STATE.current === 0;
 
     const isLast = STATE.current === STATE.questions.length - 1;
@@ -310,9 +263,6 @@ function renderQuestion() {
     if (submitBtn) submitBtn.classList.toggle('hidden', !isLast);
 }
 
-// ============================================================
-// 9. المؤقت
-// ============================================================
 function updateTimer() {
     if (STATE.submitted) return;
 
@@ -343,9 +293,6 @@ function updateTimer() {
     }
 }
 
-// ============================================================
-// 10. التنقل
-// ============================================================
 if (prevBtn) {
     prevBtn.addEventListener('click', function() {
         if (STATE.current > 0 && !STATE.submitted) {
@@ -364,9 +311,6 @@ if (nextBtn) {
     });
 }
 
-// ============================================================
-// 11. تسليم الامتحان
-// ============================================================
 async function submitExam(auto = false) {
     if (STATE.submitted) return;
     STATE.submitted = true;
@@ -376,13 +320,11 @@ async function submitExam(auto = false) {
         STATE.timerId = null;
     }
 
-    // تجهيز الإجابات
     const payload = STATE.questions.map((q, i) => ({
         question_id: q.id,
         selected_index: STATE.answers[i] !== undefined ? STATE.answers[i] : null
     }));
 
-    // إظهار شاشة النتيجة
     hide(examSection);
     show(resultSection);
 
@@ -441,9 +383,6 @@ async function submitExam(auto = false) {
     }
 }
 
-// ============================================================
-// 12. ربط الأزرار
-// ============================================================
 if (startBtn) {
     startBtn.addEventListener('click', startExam);
 }
@@ -460,80 +399,14 @@ if (submitBtn) {
     });
 }
 
-// ============================================================
-// 13. إضافة CSS
-// ============================================================
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes pulse {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.5; }
-    }
-    .options-list {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-    }
-    .option-label {
-        font-weight: 700;
-        color: #5ce1ff;
-        margin-left: 8px;
-    }
-    .option {
-        display: flex;
-        align-items: center;
-        padding: 14px 18px;
-        background: rgba(255,255,255,0.05);
-        border: 2px solid rgba(255,255,255,0.1);
-        border-radius: 12px;
-        color: #fff;
-        font-size: 16px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        width: 100%;
-        text-align: right;
-    }
-    .option:hover:not(:disabled) {
-        background: rgba(255,255,255,0.1);
-        transform: translateX(-4px);
-    }
-    .option.selected {
-        background: rgba(37, 136, 255, 0.25);
-        border-color: #2588ff;
-        box-shadow: 0 0 20px rgba(37, 136, 255, 0.15);
-    }
-    .option:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-    .spinner {
-        width: 40px;
-        height: 40px;
-        border: 4px solid rgba(255,255,255,0.1);
-        border-top-color: #2588ff;
-        border-radius: 50%;
-        animation: spin 0.8s linear infinite;
-        margin: 20px auto;
-    }
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-`;
-document.head.appendChild(style);
-
-// ============================================================
-// 14. بدء التطبيق
-// ============================================================
 document.addEventListener('DOMContentLoaded', function() {
     console.log('✅ DOM تحمّل');
 
-    // إظهار التحميل
     if (loadingSection) show(loadingSection);
     if (startSection) hide(startSection);
     if (examSection) hide(examSection);
     if (resultSection) hide(resultSection);
 
-    // تحميل الامتحان
     loadExam();
 });
 
