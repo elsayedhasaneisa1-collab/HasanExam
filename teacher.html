@@ -1,20 +1,31 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
+
 <head>
+
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1"
+  >
+
+  <meta
+    name="theme-color"
+    content="#07111f"
+  >
 
   <title>لوحة أستاذ حسن عيسى</title>
 
+  <!-- CSS -->
   <link rel="stylesheet" href="teacher.css">
 
-  <!-- إخفاء التطبيق قبل تسجيل الدخول -->
+  <!--
+    مهم:
+    التطبيق مخفي تمامًا قبل تسجيل الدخول
+  -->
   <style>
     #app {
-      display: none !important;
-    }
-
-    #detailsModal {
       display: none !important;
     }
 
@@ -25,20 +36,20 @@
     body.authenticated #login {
       display: none !important;
     }
-
-    body.authenticated #detailsModal {
-      display: flex !important;
-    }
   </style>
+
 </head>
+
 
 <body>
 
 <div class="teacher-page">
 
-  <!-- =========================
+
+  <!-- ==================================================
        LOGIN
-  ========================== -->
+  =================================================== -->
+
   <section id="login" class="login-page">
 
     <div class="login-card">
@@ -47,52 +58,80 @@
         ح
       </div>
 
-      <h1>لوحة أستاذ حسن عيسى</h1>
+      <h1>
+        أستاذ حسن عيسى
+      </h1>
 
       <p class="login-subtitle">
-        تسجيل دخول المدرس
+        لوحة إدارة الامتحانات
       </p>
 
+
       <div class="field">
-        <label for="username">اسم المستخدم</label>
+
+        <label for="username">
+          اسم المستخدم
+        </label>
 
         <input
           id="username"
           type="text"
           autocomplete="username"
-          placeholder="اسم المستخدم"
+          placeholder="أدخل اسم المستخدم"
         >
+
       </div>
 
+
       <div class="field">
-        <label for="password">كلمة المرور</label>
+
+        <label for="password">
+          كلمة المرور
+        </label>
 
         <input
           id="password"
           type="password"
           autocomplete="current-password"
-          placeholder="كلمة المرور"
+          placeholder="أدخل كلمة المرور"
         >
+
       </div>
 
-      <button id="loginBtn" class="primary-btn">
-        دخول إلى لوحة التحكم 🔐
+
+      <button
+        id="loginBtn"
+        type="button"
+        class="primary-btn"
+      >
+        دخول 🔐
       </button>
 
-      <p id="loginError" class="error"></p>
+
+      <p
+        id="loginError"
+        class="error"
+      ></p>
 
     </div>
 
   </section>
 
 
-  <!-- =========================
+
+  <!-- ==================================================
        TEACHER APP
-  ========================== -->
+  =================================================== -->
 
-  <main id="app" class="app hidden" aria-hidden="true" inert>
+  <main
+    id="app"
+    class="app hidden"
+    aria-hidden="true"
+    inert
+  >
 
-    <!-- HEADER -->
+
+    <!-- ================= HEADER ================= -->
 
     <header class="topbar">
 
@@ -103,15 +142,27 @@
         </div>
 
         <div>
-          <h1>أستاذ حسن عيسى</h1>
-          <p>لوحة إدارة الامتحانات</p>
+
+          <h1>
+            أستاذ حسن عيسى
+          </h1>
+
+          <p>
+            لوحة إدارة الامتحانات
+          </p>
+
         </div>
 
       </div>
 
+
       <div class="top-actions">
 
-        <button id="logoutBtn" class="danger-btn">
+        <button
+          id="logoutBtn"
+          type="button"
+          class="danger-btn"
+        >
           تسجيل الخروج
         </button>
 
@@ -120,30 +171,39 @@
     </header>
 
 
-    <!-- CONTENT -->
+
+    <!-- ==================================================
+         DASHBOARD
+    =================================================== -->
 
     <section class="dashboard">
 
-      <!-- =========================
+
+      <!-- ==================================================
            CREATE EXAM
-      ========================== -->
+      =================================================== -->
 
       <div class="card">
 
         <div class="card-header">
 
           <div>
-            <h2>إنشاء امتحان جديد 📝</h2>
+
+            <h2>
+              إنشاء امتحان جديد 📝
+            </h2>
 
             <p>
               أنشئ امتحانًا وحدد مدة الحل ومدة إتاحة الرابط.
             </p>
+
           </div>
 
         </div>
 
 
-        <!-- TITLE -->
+
+        <!-- اسم الامتحان -->
 
         <div class="field">
 
@@ -155,13 +215,15 @@
             id="examTitleInput"
             type="text"
             maxlength="150"
-            placeholder="مثال: امتحان اللغة العربية - الوحدة الأولى"
+            autocomplete="off"
+            placeholder="مثال: امتحان اللغة العربية"
           >
 
         </div>
 
 
-        <!-- DURATION -->
+
+        <!-- مدة الحل -->
 
         <div class="field">
 
@@ -174,6 +236,7 @@
             type="number"
             min="1"
             max="1440"
+            step="1"
             value="30"
             placeholder="30"
           >
@@ -185,7 +248,8 @@
         </div>
 
 
-        <!-- AVAILABILITY -->
+
+        <!-- مدة الإتاحة -->
 
         <div class="field">
 
@@ -210,7 +274,10 @@
         </div>
 
 
-        <!-- QUESTIONS -->
+
+        <!-- ==================================================
+             QUESTIONS
+        =================================================== -->
 
         <div class="questions-title">
 
@@ -226,6 +293,7 @@
 
           </div>
 
+
           <button
             id="addQuestionBtn"
             type="button"
@@ -237,21 +305,23 @@
         </div>
 
 
-        <div id="questionsContainer" class="questions-container">
+        <!-- هنا JavaScript هيضيف الأسئلة -->
 
-          <!-- يتم إنشاء الأسئلة بواسطة teacher.js -->
+        <div
+          id="questionsContainer"
+          class="questions-container"
+        ></div>
 
-        </div>
 
 
-        <!-- CREATE -->
+        <!-- إنشاء الامتحان -->
 
         <div class="create-actions">
 
           <button
             id="createExamBtn"
-            class="primary-btn"
             type="button"
+            class="primary-btn"
           >
             إنشاء الامتحان 🚀
           </button>
@@ -259,32 +329,44 @@
         </div>
 
 
-        <p id="createError" class="error"></p>
+        <p
+          id="createError"
+          class="error"
+        ></p>
 
       </div>
 
 
 
-      <!-- =========================
+      <!-- ==================================================
            CREATED EXAM
-      ========================== -->
+      =================================================== -->
 
-      <div id="createdExam" class="card hidden">
+      <div
+        id="createdExam"
+        class="card hidden"
+      >
 
         <div class="success-icon">
           ✅
         </div>
 
+
         <h2>
           تم إنشاء الامتحان بنجاح
         </h2>
 
+
         <p>
-          يمكنك الآن إرسال رابط الامتحان للطلاب.
+          الامتحان جاهز ويمكنك إرسال الرابط للطلاب.
         </p>
 
 
+
         <div class="exam-result-box">
+
+
+          <!-- الكود -->
 
           <div class="result-row">
 
@@ -298,6 +380,9 @@
 
           </div>
 
+
+
+          <!-- الرابط -->
 
           <div class="result-row">
 
@@ -314,10 +399,13 @@
           </div>
 
 
+
+          <!-- انتهاء الإتاحة -->
+
           <div class="result-row">
 
             <span>
-              ينتهي الامتحان
+              انتهاء الإتاحة
             </span>
 
             <strong id="shareExpiry">
@@ -326,26 +414,31 @@
 
           </div>
 
+
         </div>
+
 
 
         <div class="result-actions">
 
+
           <button
             id="copyLinkBtn"
-            class="primary-btn"
             type="button"
+            class="primary-btn"
           >
             📋 نسخ الرابط
           </button>
 
+
           <button
             id="newExamBtn"
-            class="secondary-btn"
             type="button"
+            class="secondary-btn"
           >
             إنشاء امتحان آخر
           </button>
+
 
         </div>
 
@@ -353,11 +446,12 @@
 
 
 
-      <!-- =========================
+      <!-- ==================================================
            RESULTS
-      ========================== -->
+      =================================================== -->
 
       <div class="card">
+
 
         <div class="card-header">
 
@@ -368,21 +462,25 @@
             </h2>
 
             <p>
-              اعرض نتائج الامتحانات التي تم تسليمها.
+              عرض نتائج الطلاب والدرجات الخاصة بالامتحانات.
             </p>
 
           </div>
 
+
           <button
             id="loadResultsBtn"
-            class="secondary-btn"
             type="button"
+            class="secondary-btn"
           >
             تحديث النتائج 🔄
           </button>
 
         </div>
 
+
+
+        <!-- البحث بالكود -->
 
         <div class="results-tools">
 
@@ -396,6 +494,7 @@
               id="resultsCode"
               type="text"
               maxlength="20"
+              autocomplete="off"
               placeholder="اتركه فارغًا لعرض كل النتائج"
             >
 
@@ -404,8 +503,14 @@
         </div>
 
 
-        <p id="resultsError" class="error"></p>
+        <p
+          id="resultsError"
+          class="error"
+        ></p>
 
+
+
+        <!-- جدول النتائج -->
 
         <div class="table-wrap">
 
@@ -439,11 +544,15 @@
 
             </thead>
 
+
             <tbody id="resultsBody">
 
               <tr>
 
-                <td colspan="5" class="empty">
+                <td
+                  colspan="5"
+                  class="empty"
+                >
                   لا توجد نتائج حتى الآن.
                 </td>
 
@@ -456,26 +565,32 @@
         </div>
 
 
+
+        <!-- PDF -->
+
         <div class="pdf-actions">
 
           <button
             id="downloadPdfBtn"
-            class="primary-btn"
             type="button"
+            class="primary-btn"
           >
             📄 تنزيل النتائج PDF
           </button>
 
         </div>
 
+
       </div>
+
 
     </section>
 
 
-    <!-- =========================
+
+    <!-- ==================================================
          FOOTER
-    ========================== -->
+    =================================================== -->
 
     <footer class="footer">
 
@@ -489,12 +604,14 @@
 
     </footer>
 
+
   </main>
 
 
-  <!-- =========================
-       DETAILS MODAL
-  ========================== -->
+
+  <!-- ==================================================
+       MODAL
+  =================================================== -->
 
   <div
     id="detailsModal"
@@ -504,45 +621,52 @@
 
     <div class="modal-box">
 
+
       <button
         id="closeModalBtn"
-        class="modal-close"
         type="button"
+        class="modal-close"
+        aria-label="إغلاق"
       >
         ×
       </button>
+
 
       <h2>
         تفاصيل النتيجة
       </h2>
 
-      <div id="modalContent">
 
-      </div>
+      <div id="modalContent"></div>
+
 
     </div>
 
   </div>
 
 
-  <!-- =========================
-       LIBRARIES
-  ========================== -->
+
+  <!-- ==================================================
+       PDF LIBRARIES
+  =================================================== -->
 
   <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
-  </script>
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
+  ></script>
+
 
   <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js">
-  </script>
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"
+  ></script>
 
 
-  <!-- =========================
-       TEACHER JS
-  ========================== -->
+
+  <!-- ==================================================
+       TEACHER JAVASCRIPT
+  =================================================== -->
 
   <script src="teacher.js"></script>
+
 
 </div>
 
